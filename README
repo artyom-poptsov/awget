@@ -1,0 +1,62 @@
+			awget
+
+Awget is yet another download manager.  It is aimed for using with
+Awesome window manager, but unfortunately written in Scheme instead of
+Lua.
+
+This download manager consist of awget console tool and awgetd daemon
+which actually does all work.
+
+Awget has got the following dependences:
+
+  * GNU Guile 1.8+
+  * wget
+  * libnotify
+
+Note that this project is under quite active development, and probably
+it lacks some _very important features_ you might expect and/or
+contains annoying bugs.
+
+
+	BECAUSE OF BETA STATUS...
+
+Because of beta status, you should go through some additional steps to
+try awget in the action.
+
+First of all, add a directory with awget sources to the Guile load
+path:
+
+  $ export GUILE_LOAD_PATH=~/bin/awget
+
+Then create the /var/run/awget dir in which awget will store its .pid
+file to track daemon status:
+
+  $ su -
+  # mkdir /var/run/awget
+
+If awgetd stopped abnormally, do the following to get awget working
+again:
+
+  $ rm /run/awget/awget.pid; rm ~/.awget/awget
+
+
+	USAGE
+
+Normally awgetd will be started as soon as you try to add the first
+link.  But you can start the daemon manually by calling awget with
+"-d" option:
+
+  $ awget -d
+
+Now you can add a new link that will be put in a queue for download:
+
+  $ awget ftp://ftp.gnu.org/gnu/guile/guile-2.0.0.tar.gz
+
+To get brief information about awget usage type:
+
+  $ awget -h
+
+Also the standard Guile tool display-commentary can be used to get
+extra information about files:
+
+  $ guile-tools display-commentary awget.scm
