@@ -33,6 +33,7 @@ file to track daemon status:
 
   $ su -
   # mkdir /var/run/awget
+  # chown your-login-name:your-group /var/run/awget
 
 If awgetd stopped abnormally, do the following to get awget working
 again:
