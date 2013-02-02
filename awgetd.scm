@@ -72,9 +72,9 @@
    #:getter get-socket)
 
   (debug-mode
+   #:getter debug?
    #:init-keyword #:debug-mode
-   #:init-value   #f
-   #:getter debug?)
+   #:init-value   #f)
 
   (logger
    #:setter set-logger
@@ -88,9 +88,11 @@
    #:setter set-wget
    #:getter get-wget)
 
-  (wget-log
-   #:setter set-wget-log
-   #:getter get-wget-log)
+  (downloads-dir
+   #:setter set-downloads-dir
+   #:getter get-downloads-dir
+   #:init-keyword #:downloads-dir
+   #:init-value #f)
 
   (link-list
    #:setter set-link-list
@@ -113,8 +115,9 @@
 
   (set-link-list obj (make <awlist>))
 
-  (set-wget-log obj (string-append (get-home obj) "/wget.log"))
-  (set-wget     obj (make <wget> #:log (get-wget-log obj)))
+  (set-wget obj (make <wget>))
+  (if (not (eq? (get-downloads-dir obj) #f))
+      (set-dir-prefix (get-wget obj) (get-downloads-dir obj)))
 
   (if (file-exists? (get-link-list-file obj))
       (load-list (get-link-list obj) (get-link-list-file obj))))

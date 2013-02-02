@@ -53,6 +53,9 @@ Now you can add a new link that will be put in a queue for download:
 
   $ awget ftp://ftp.gnu.org/gnu/guile/guile-2.0.0.tar.gz
 
+You can configure wget through the ~/.wgetrc file.  See the GNU Info
+entry for wget for more information.
+
 To get brief information about awget usage type:
 
   $ awget -h

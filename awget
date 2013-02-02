@@ -79,11 +79,9 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
 (define-class <awget> ()
   (awget-home
    #:setter set-home
-   #:getter get-home)
-
-  (logger
-   #:setter set-logger
-   #:getter get-logger)
+   #:getter get-home
+   #:init-keyword #:home
+   #:init-value (string-append (getenv "HOME") "/." *program-name*))
 
   (awget-pid-file
    #:setter set-pid-file
@@ -95,40 +93,43 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
    #:getter get-socket-path
    #:init-keyword #:awget-socket-path)
 
+  (awget-downloads-dir
+   #:setter set-downloads-dir
+   #:getter get-downloads-dir
+   #:init-keyword #:downloads-dir)
+
   (awget-link-list-file
    #:setter set-link-list-file
    #:getter get-link-list-file)
 
+  (logger
+   #:setter set-logger
+   #:getter get-logger)
+  
   (debug-mode
-   #:init-value #f
    #:setter set-debug-mode
-   #:getter debug?)
+   #:getter debug?
+   #:init-value #f)
   
   (version
    #:setter set-version
-   #:getter get-version))
+   #:getter get-version
+   #:init-value *program-version*))
 
 (define-method (initialize (obj <awget>) args)
   (next-method)
 
-  (set-logger obj (make <logger>
-                    #:ident    *program-name*
-                    #:facility 'user))
-
-  (set-version obj *program-version*)
-
-  ;; Paths
-
-  (set-home obj (string-append (getenv "HOME") "/." *program-name*))
-  
-  (set-pid-file obj (string-append
-                     "/var/run/" *program-name* "/" *program-name* ".pid"))
-
+  (set-pid-file       obj (string-append
+                           "/var/run/" *program-name* "/" *program-name* ".pid"))
   (set-socket-path    obj (string-append (get-home obj) "/" *program-name*))
   (set-link-list-file obj (string-append (get-home obj) "/awlist"))
-  
+
   (if (not (file-exists? (get-home obj)))
-      (mkdir (get-home obj))))
+      (mkdir (get-home obj)))
+  
+  (set-logger obj (make <logger>
+                    #:ident    *program-name*
+                    #:facility 'user)))
 
 
 ;;; Public methods

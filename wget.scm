@@ -18,46 +18,42 @@
 
 ;;; Commentary:
 
-;; Interface for wget(1).
-;; 
+;; Interface for wget(1).  By default wget will use settings from
+;; either system-wide /etc/wgetrc or user's $HOME/.wgetrc (see the GNU
+;; Info entry for wget).  This behaviour might be changed by setting
+;; #:config slot for <wget>.
+;;
 ;; These methods are exported:
 ;;
-;;   (get-url url)
+;;   (get-url obj url)
+;;   (set-downloads-dir obj path)
 
 
 ;;; Code:
 
 (define-module (unix wget)
   #:use-module (oop goops)
-  #:export     (<wget> get-url))
+  #:export     (<wget> get-url
+                       set-dir-prefix))
 
 
 ;;; Main class
 
 (define-class <wget> ()
-  (proxy
-   #:setter set-proxy
-   #:getter get-proxy
+  (dir-prefix
+   #:setter set-dir-prefix
+   #:getter get-dir-prefix
    #:init-value #f
-   #:init-keyword #:proxy)
- 
-  (downloads-dir
-   #:setter set-downloads-dir
-   #:getter get-downloads-dir
-   #:init-keyword #:downloads-dir)
+   #:init-keyword #:dir-prefix)
 
-  (log
-   #:setter set-log
-   #:getter get-log
-   #:init-keyword #:log))
+  (config
+   #:setter set-config
+   #:getter get-config
+   #:init-value #f
+   #:init-keyword #:config))
 
 (define-method (initialize (obj <wget>) args)
-  (next-method)
-  (set-log obj (string-append (getenv "HOME")
-                              "/downloads/awget.log"))
-  (set-downloads-dir obj
-                     (string-append (getenv "HOME")
-                                    "/downloads/")))
+  (next-method))
 
 
 ;;; Public methods
@@ -65,9 +61,17 @@
 (define-method (get-url (obj <wget>) (url <string>))
   (system (string-append
            "wget"
-           " --no-verbose"
-           " --append-output=" (get-log obj)
-           " --directory-prefix=" (get-downloads-dir obj)
+
+           (if (not (eq? (get-config obj) #f))
+               (string-append
+                " --config=" (get-config obj))
+               "")
+
+           (if (not (eq? (get-dir-prefix obj) #f))
+               (string-append
+                " --directory-prefix=" (get-dir-prefix obj))
+               "")
+
            " " url)))
 
 ;;; wget.scm ends here
