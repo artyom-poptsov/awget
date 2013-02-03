@@ -38,7 +38,8 @@ file to track daemon status:
 If awgetd stopped abnormally, do the following to get awget working
 again:
 
-  $ rm /run/awget/awget.pid; rm ~/.awget/awget
+  $ rm /run/awget/awget.pid
+  $ rm ~/.awget/awget
 
 
 	USAGE
@@ -51,12 +52,17 @@ link.  But you can start the daemon manually by calling awget with
 
 Now you can add a new link that will be put in a queue for download:
 
-  $ awget ftp://ftp.gnu.org/gnu/guile/guile-2.0.0.tar.gz
+  $ awget -a ftp://ftp.gnu.org/gnu/guile/guile-2.0.0.tar.gz
 
-You can configure wget through the ~/.wgetrc file.  See the GNU Info
-entry for wget for more information.
+The '-n' (or '--link') option can be used for setting the current link
+for further operations.  The option takes a link ID as a parameter.
+Link ID can be gained from the first column of the '-l' output.  For
+example, to remove the first link from awget, you should use '-l'
+option along with '-r' (or '--remove'):
 
-To get brief information about awget usage type:
+  $ awget -n 1 -r
+
+To get brief information about awget usage and possible options type:
 
   $ awget -h
 
@@ -64,3 +70,6 @@ Also the standard Guile tool display-commentary can be used to get
 extra information about files:
 
   $ guile-tools display-commentary awget.scm
+
+You can configure wget through the ~/.wgetrc file.  See the GNU Info
+entry for wget for more information.
