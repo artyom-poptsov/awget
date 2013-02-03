@@ -42,6 +42,7 @@
 (define-module (awget awlist)
   #:use-module (oop goops)
   #:use-module (unix dsv-parser)
+  #:use-module (ice-9 common-list)
   #:export (<awlist> add-link
                      rem-link
                      set-done
@@ -106,7 +107,8 @@
 ;; Remove a link with id ID.
 (define-method (rem-link (obj <awlist>) (id <number>))
   (lock-mutex (get-mutex obj))
-  (set-link-list obj (remove-if (lambda (element) (eq? (car elem) id))
+  (set-link-list obj (remove-if (lambda (element)
+                                  (= (string->number (car element)) id))
                                 (get-link-list obj)))
   (unlock-mutex (get-mutex obj)))
 

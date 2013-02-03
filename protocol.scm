@@ -35,5 +35,6 @@
 (define-public *cmd-add-link*             1)
 (define-public *cmd-get-list*             2)
 (define-public *cmd-quit*                 3)
+(define-public *cmd-rem-link*             4)
 
 ;;; protocol.scm ends here

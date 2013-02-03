@@ -142,15 +142,22 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
 (define-method (print-help (obj <awget>))
   (display
    (string-append
-    "awget download manager (version " (get-version obj) ")\n"
+    "awget download manager (version " (get-version obj) ")\n\n"
     "Usage:\n"
-    *program-name* " [OPTIONS]... [LINK]...\n"
-    "-h, --help     Print this message and exit.\n"
-    "-v, --version  Print program version and exit.\n"
-    "-d, --daemon   Start the awget daemon (awgetd).\n"
-    "-l, --list     List all links.\n"
-    "-x, --exit     Stop daemon.\n"
-    "--debug        Debug mode.  Normally you should'n use this.\n")))
+    "\t" *program-name* " [options]\n"
+    "\n"
+    "General options:\n"
+    "\t" "-h, --help     Print this message and exit.\n"
+    "\t" "-v, --version  Print program version and exit.\n"
+    "\t" "-d, --daemon   Start the awget daemon (awgetd).\n"
+    "\t" "-x, --exit     Stop daemon.\n"
+    "\t" "--debug        Debug mode.  Normally you should'n use this.\n"
+    "\n"
+    "Download management:\n"
+    "\t" "-a, --add      Add a new link.\n"
+    "\t" "-n, --link     Set current link.\n"
+    "\t" "-l, --list     List all links.\n"
+    "\t" "-r, --remove   Remove the current link.\n")))
 
 (define-method (daemon-started? (obj <awget>))
   (file-exists? (get-pid-file obj)))
@@ -224,6 +231,9 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
   (for-each (lambda (link) (send-link-to-daemon obj link))
             link-list))
 
+(define-method (rem-link (obj <awget>) (link-id <number>))
+  (send-message obj *cmd-rem-link* link-id))
+
 
 ;;; Program entry point
 
@@ -231,67 +241,75 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
 (define (main . args)
 
   (define *option-spec*
-    '((daemon  (single-char #\d) (value #f))
-      (list    (single-char #\l) (value #f))
+    '(;; General options
+      (daemon  (single-char #\d) (value #f))
       (exit    (single-char #\x) (value #f))
       (version (single-char #\v) (value #f))
       (help    (single-char #\h) (value #f))
-      (debug                     (value #f))))
+      (debug                     (value #f))
+      ;; Link management
+      (add     (single-char #\a) (value #f))
+      (link    (single-char #\n) (value #t))
+      (list    (single-char #\l) (value #f))
+      (remove  (single-char #\r) (value #f))))
 
   (let* ((awget          (make <awget>))
          (options        (getopt-long args *option-spec*))
          (help-wanted    (option-ref options 'help    #f))
          (version-wanted (option-ref options 'version #f))
          (daemon-wanted  (option-ref options 'daemon  #f))
-         (list-wanted    (option-ref options 'list    #f))
          (exit-wanted    (option-ref options 'exit    #f))
          (debug-wanted   (option-ref options 'debug   #f))
+
+         (add-link-wanted    (option-ref options 'add    #f))
+         (list-wanted        (option-ref options 'list   #f))
+         (current-link       (option-ref options 'link   #f))
+         (remove-link-wanted (option-ref options 'remove #f))
+
          (arguments      (option-ref options '()      #f)))
 
     (if (eq? debug-wanted #t)
         (begin
           (set-debug-mode awget #t)
           (debug-message awget "Debug mode enabled")))
-    
+
     (cond
 
      ((eq? version-wanted #t)
       (begin
-        (print-version awget)
-        (quit)))
+        (print-version awget)))
 
      ((eq? help-wanted #t)
       (begin
-        (print-help awget)
-        (quit)))
+        (print-help awget)))
 
      ((eq? daemon-wanted #t)
       (begin
         (if (not (daemon-started? awget))
             (daemonize awget)
-            (display "Daemon already started.\n"))
-        (quit)))
+            (display "Daemon already started.\n"))))
 
      ((eq? list-wanted #t)
       (begin
         (if (not (daemon-started? awget))
             (daemonize awget))
         (print-list (get-list awget))
-        (newline)
-        (quit)))
+        (newline)))
 
      ((eq? exit-wanted #t)
       (begin
         (if (daemon-started? awget)
-            (stop-daemon awget))
-        (quit))))
+            (stop-daemon awget))))
 
-    (if (not (eq? arguments #f))
-        (begin
-          (if (not (daemon-started? awget))
-              (daemonize awget))
-          (add-link awget arguments)
-          (quit)))
+     ((eq? add-link-wanted #t)
+      (begin
+        (if (not (daemon-started? awget))
+            (daemonize awget))
+        (add-link awget arguments)))
+
+     ((eq? remove-link-wanted)
+      (begin
+        (rem-link awget (string->number current-link)))))
 
     (quit)))
 

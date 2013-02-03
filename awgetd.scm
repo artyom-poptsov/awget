@@ -183,6 +183,9 @@
   (debug-message obj (string-append "New link: " link))
   (add-link (get-link-list obj) link))
 
+(define-method (rem-link (obj <awgetd>) (link-id <number>))
+  (rem-link (get-link-list obj) link-id))
+
 (define-method (send-message (obj <awgetd>) message (port <port>))
   (write message port)
   (newline port))
@@ -245,6 +248,10 @@
          ((eq? message-type *cmd-get-list*)
           (send-message obj
                         (get-list (get-link-list obj)) client))
+
+         ((eq? message-type *cmd-rem-link*)
+          (let ((link-id (cadr message)))
+            (rem-link obj link-id)))
 
          ((eq? message-type *cmd-quit*)
           (begin
