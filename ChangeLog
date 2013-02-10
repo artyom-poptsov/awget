@@ -1,0 +1,8 @@
+2013-02-10  Artyom Poptsov  <poptsov.artyom@gmail.com>
+
+	Use GNU Build System.
+	* INSTALL, NEWS: New files.
+	* Makefile.am, Makefile.in, aclocal.m4, configure, configure.ac,
+	depcomp, install-sh, missing: New files.
+	* README: Update.
+

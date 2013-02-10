@@ -26,7 +26,14 @@ try awget in the action.
 First of all, add a directory with awget sources to the Guile load
 path:
 
-  $ export GUILE_LOAD_PATH=~/bin/awget
+  $ export GUILE_LOAD_PATH=${GUILE_LOAD_PATH}:~/bin/awget
+
+or
+
+  $ export GUILE_LOAD_PATH=${GUILE_LOAD_PATH}:/usr/local/share/awget
+
+if you've installed awget (see the next section).  You can put this in
+/etc/profile or shell's config file in your home directory.
 
 Then create the /var/run/awget dir in which awget will store its .pid
 file to track daemon status:
@@ -40,6 +47,19 @@ again:
 
   $ rm /run/awget/awget.pid
   $ rm ~/.awget/awget
+
+
+	INSTALLING
+
+Awget can be installed in the classical manner:
+
+  $ ./configure
+  $ sudo make install
+
+See INSTALL for general information about installation.  
+
+The program will be installed in /usr/local/bin and Scheme sources
+will be placed in /usr/local/share/awget directory by default.
 
 
 	USAGE
@@ -57,7 +77,7 @@ Now you can add a new link that will be put in a queue for download:
 The '-n' (or '--link') option can be used for setting the current link
 for further operations.  The option takes a link ID as a parameter.
 Link ID can be gained from the first column of the '-l' output.  For
-example, to remove the first link from awget, you should use '-l'
+example, to remove the first link from awget, you should use '-n'
 option along with '-r' (or '--remove'):
 
   $ awget -n 1 -r
