@@ -1,3 +1,12 @@
+2013-02-21  Artyom Poptsov  <poptsov.artyom@gmail.com>
+
+	Move sources to the src subdir.
+
+	* awget, awgetd.scm, awlist.scm, dsv-parser.scm, logger.scm,
+	notify-bus.scm, protocol.scm, wget.scm: Move to the src dir.
+	* Makefile.am: Update paths.
+	* Makefile.in: Update.
+
 2013-02-10  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
 	Use GNU Build System.
