@@ -1,5 +1,8 @@
 2013-02-23  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
+	* src/awgetd.scm (daemonize): Close the default input and output
+	port.
+
 	* src/awlist.scm (load-list): Add check for an empty awlist file.
 
 2013-02-21  Artyom Poptsov  <poptsov.artyom@gmail.com>

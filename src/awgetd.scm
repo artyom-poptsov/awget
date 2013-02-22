@@ -137,7 +137,11 @@
   (let ((pid (primitive-fork)))
   (if (zero? pid)
       (begin
+        (close-port (current-input-port))
+        (close-port (current-output-port))
+
         (setsid)
+
         (open-socket   obj)
         (start-aworker obj)
         (main-loop     obj))
