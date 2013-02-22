@@ -150,7 +150,8 @@
   (let ((file-port (open-input-file file-name)))
     (set-link-list obj (dsv-read file-port)))
 
-  (let ((last-rec (car (reverse (get-link-list obj)))))
-    (set-last-record-number obj (string->number (car last-rec)))))
+  (if (not (null? (get-link-list obj)))
+      (let ((last-rec (car (reverse (get-link-list obj)))))
+        (set-last-record-number obj (string->number (car last-rec))))))
 
 ;;; awlist.scm ends here.
