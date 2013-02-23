@@ -1,5 +1,13 @@
 2013-02-23  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
+	Add an init script for OpenRC.  Handle signals.
+	* src/awgetd.scm (register-sighandlers): New procedure.
+	(main-loop): Use a wrapper for accept procedure to catch
+	exceptions.
+	* src/awget: Fix path to the pidfile.
+	* etc/init.gentoo: New file.
+	* README: Update.
+
 	* src/awgetd.scm (daemonize): Close the default input and output
 	port.
 

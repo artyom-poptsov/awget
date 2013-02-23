@@ -61,6 +61,17 @@ See INSTALL for general information about installation.
 The program will be installed in /usr/local/bin and Scheme sources
 will be placed in /usr/local/share/awget directory by default.
 
+There is an script for OpenRC, so you can manage awgetd with the
+standard Gentoo tool rc-config.  First of all, copy the file to the
+init.d directory:
+
+  $ sudo cp etc/init.gentoo /etc/init.d/awgetd
+
+Then create a symlink to awgetd for the every user that should be able
+to use awgetd as a service:
+
+  $ sudo ln -s awget /etc/init.d/awgetd.$USER
+
 
 	USAGE
 

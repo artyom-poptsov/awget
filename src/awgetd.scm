@@ -142,6 +142,8 @@
 
         (setsid)
 
+        (register-sighandlers obj)
+
         (open-socket   obj)
         (start-aworker obj)
         (main-loop     obj))
@@ -154,6 +156,18 @@
   (save-list (get-link-list obj) (get-link-list-file obj))
   (remove-pid-file obj)
   (quit))
+
+
+(define-method (register-sighandlers (obj <awgetd>))
+  (define (handler signum)
+    (logger-message (get-logger obj) 'info
+                    (string-append "Signal " (number->string signum)
+                                   " has been received."))
+    (stop obj))
+
+  (sigaction SIGINT  handler)
+  (sigaction SIGHUP  handler)
+  (sigaction SIGTERM handler))
 
 
 (define-method (create-pid-file (obj <awgetd>) (pid <number>))
@@ -226,12 +240,21 @@
 
 ;; Main loop of the awgetd
 (define-method (main-loop (obj <awgetd>))
+
+  ;; Wrapper for accept() that catch errors.
+  (define (awget-accept socket)
+    (catch 'system-error
+      (lambda ()
+        (accept socket))
+      (lambda (key . args)
+        (logger-message (get-logger obj) 'err "accept() call was interrupted."))))
+
   (logger-message (get-logger obj) 'info "Daemon started.")
 
   (let ((awget-socket (get-socket obj)))
 
     (while #t
-      (let* ((client-connection (accept awget-socket))
+      (let* ((client-connection (awget-accept awget-socket))
              (client            (car client-connection))
              (message           (read (open-input-string (read-line client 'trim))))
              (message-type      (car message)))

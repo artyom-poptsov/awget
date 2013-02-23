@@ -120,7 +120,9 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
   (next-method)
 
   (set-pid-file       obj (string-append
-                           "/var/run/" *program-name* "/" *program-name* ".pid"))
+                           "/var/run/" *program-name*
+                           "/" (getenv "USER")
+                           "/" *program-name* ".pid"))
   (set-socket-path    obj (string-append (get-home obj) "/" *program-name*))
   (set-link-list-file obj (string-append (get-home obj) "/awlist"))
 

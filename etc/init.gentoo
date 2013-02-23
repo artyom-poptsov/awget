@@ -1,0 +1,45 @@
+#!/sbin/runscript
+# Copyright (C) Artyom V. Poptsov <poptsov.artyom@gmail.com>
+# Distributed under the terms of the GNU General Public License v3, or later
+
+AWGET=/usr/local/bin/awget
+AWGET_OPS=-d
+USER=${RC_SVCNAME##*.}
+PIDFILE_DIR=/var/run/awget/${USER}
+PIDFILE=${PIDFILE_DIR}/awget.pid
+
+export GUILE_LOAD_PATH=${GUILE_LOAD_PATH}:/usr/local/share/awget
+
+depend() {
+	need net logger
+}
+
+checkconfig() {
+	if [ "${USER}" = "${RC_SVCNAME}" ]; then
+		eerror "You have to create an init script for each user:"
+		eerror "ln -s awget /etc/init.d/awget.<user>"
+		return 1
+	fi
+
+	checkpath -d --owner 0 --mode 0755 "${PIDFILE_DIR%/*}"
+	checkpath -d --owner "${USER}" --mode 0755 "${PIDFILE_DIR}"
+}
+
+start() {
+	local home
+	checkconfig || return 1
+
+	eval home="~${USER}"
+
+	ebegin "Starting Awget daemon for user ${USER}"
+	start-stop-daemon --start \
+		--user "${USER}" --pidfile "${PIDFILE}" --chdir "${home}" \
+		--exec "${AWGET}" -- ${AWGET_OPS}
+	eend $?
+}
+
+stop() {
+	start-stop-daemon --stop \
+		--user "${USER}" --pidfile "${PIDFILE}" \
+		--exec "${AWGET}"
+}
