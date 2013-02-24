@@ -1,3 +1,7 @@
+2013-02-24  Artyom Poptsov  <poptsov.artyom@gmail.com>
+
+	* src/wget.scm (get-url): Wrap an URL in quotes.
+
 2013-02-23  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
 	Add an init script for OpenRC.  Handle signals.
