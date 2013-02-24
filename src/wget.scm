@@ -72,6 +72,6 @@
                 " --directory-prefix=" (get-dir-prefix obj))
                "")
 
-           " \"" url "\"")))
+           " '" url "'")))
 
 ;;; wget.scm ends here
