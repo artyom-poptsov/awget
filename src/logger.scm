@@ -36,7 +36,7 @@
 
 ;;; Module definition
 
-(define-module (unix logger)
+(define-module (awget util logger)
   #:use-module (oop goops)
   #:export     (<logger> logger-message))
 

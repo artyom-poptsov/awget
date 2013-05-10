@@ -37,11 +37,9 @@
 
 ;;; Code:
 
-(load-from-path "dsv-parser.scm")
-
 (define-module (awget awlist)
   #:use-module (oop goops)
-  #:use-module (unix dsv-parser)
+  #:use-module (awget util dsv-parser)
   #:use-module (ice-9 common-list)
   #:export (<awlist> add-link
                      rem-link

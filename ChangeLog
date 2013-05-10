@@ -1,3 +1,16 @@
+2013-05-10  Artyom Poptsov  <poptsov.artyom@gmail.com>
+
+	Improve way of working with Guile modules system.
+
+	* src/awget: Rename to awget.scm.  Fix usage of Guile modules.
+	* src/awgetd.scm, src/awlist.scm: Fix usage of Guile modules.
+	* src/dsv-parser.scm, src/logger.scm, src/notify-bus.scm,
+	src/wget.scm: Likewise.  Rename modules.
+	* Makefile.am: Improve.  Install utilites such as logger and
+	dsv-parser in the awget/util/ directory.  Set data dir for awget
+	during install.
+	* Makefile.in: Update.
+
 2013-02-24  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
 	* src/wget.scm (get-url): Wrap an URL in quotes.

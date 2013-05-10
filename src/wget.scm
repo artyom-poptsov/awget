@@ -31,7 +31,7 @@
 
 ;;; Code:
 
-(define-module (unix wget)
+(define-module (awget util wget)
   #:use-module (oop goops)
   #:export     (<wget> get-url
                        set-dir-prefix))

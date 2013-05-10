@@ -92,7 +92,7 @@ am__uninstall_files_from_dir = { \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(awgetdir)" \
-	"$(DESTDIR)$(docdir)"
+	"$(DESTDIR)$(awget_utildir)" "$(DESTDIR)$(docdir)"
 SCRIPTS = $(bin_SCRIPTS)
 SOURCES =
 DIST_SOURCES =
@@ -101,7 +101,7 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
-DATA = $(awget_DATA) $(dist_doc_DATA)
+DATA = $(awget_DATA) $(awget_util_DATA) $(dist_doc_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -195,12 +195,14 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 awgetdir = $(datadir)/awget
-bin_SCRIPTS = src/awget
+bin_SCRIPTS = awget
 dist_doc_DATA = README COPYING AUTHORS ChangeLog
-awget_DATA = src/awgetd.scm src/awlist.scm src/dsv-parser.scm \
-			src/logger.scm src/notify-bus.scm src/protocol.scm \
+awget_DATA = src/awgetd.scm src/awlist.scm src/protocol.scm
+awget_utildir = $(pkgdatadir)/util
+awget_util_DATA = src/dsv-parser.scm src/logger.scm src/notify-bus.scm \
 			src/wget.scm
 
+CLEANFILES = awget
 all: all-am
 
 .SUFFIXES:
@@ -294,6 +296,27 @@ uninstall-awgetDATA:
 	@list='$(awget_DATA)'; test -n "$(awgetdir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	dir='$(DESTDIR)$(awgetdir)'; $(am__uninstall_files_from_dir)
+install-awget_utilDATA: $(awget_util_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(awget_util_DATA)'; test -n "$(awget_utildir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(awget_utildir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(awget_utildir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(awget_utildir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(awget_utildir)" || exit $$?; \
+	done
+
+uninstall-awget_utilDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(awget_util_DATA)'; test -n "$(awget_utildir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(awget_utildir)'; $(am__uninstall_files_from_dir)
 install-dist_docDATA: $(dist_doc_DATA)
 	@$(NORMAL_INSTALL)
 	@list='$(dist_doc_DATA)'; test -n "$(docdir)" || list=; \
@@ -488,7 +511,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(SCRIPTS) $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(awgetdir)" "$(DESTDIR)$(docdir)"; do \
+	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(awgetdir)" "$(DESTDIR)$(awget_utildir)" "$(DESTDIR)$(docdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -513,6 +536,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -542,7 +566,8 @@ info: info-am
 
 info-am:
 
-install-data-am: install-awgetDATA install-dist_docDATA
+install-data-am: install-awgetDATA install-awget_utilDATA \
+	install-dist_docDATA
 
 install-dvi: install-dvi-am
 
@@ -588,8 +613,8 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-awgetDATA uninstall-binSCRIPTS \
-	uninstall-dist_docDATA
+uninstall-am: uninstall-awgetDATA uninstall-awget_utilDATA \
+	uninstall-binSCRIPTS uninstall-dist_docDATA
 
 .MAKE: install-am install-strip
 
@@ -598,17 +623,21 @@ uninstall-am: uninstall-awgetDATA uninstall-binSCRIPTS \
 	dist-tarZ dist-xz dist-zip distcheck distclean \
 	distclean-generic distcleancheck distdir distuninstallcheck \
 	dvi dvi-am html html-am info info-am install install-am \
-	install-awgetDATA install-binSCRIPTS install-data \
-	install-data-am install-dist_docDATA install-dvi \
+	install-awgetDATA install-awget_utilDATA install-binSCRIPTS \
+	install-data install-data-am install-dist_docDATA install-dvi \
 	install-dvi-am install-exec install-exec-am install-html \
 	install-html-am install-info install-info-am install-man \
 	install-pdf install-pdf-am install-ps install-ps-am \
 	install-strip installcheck installcheck-am installdirs \
 	maintainer-clean maintainer-clean-generic mostlyclean \
 	mostlyclean-generic pdf pdf-am ps ps-am uninstall uninstall-am \
-	uninstall-awgetDATA uninstall-binSCRIPTS \
-	uninstall-dist_docDATA
+	uninstall-awgetDATA uninstall-awget_utilDATA \
+	uninstall-binSCRIPTS uninstall-dist_docDATA
 
+
+awget: src/awget.scm
+	sed -e 's|__DATA_DIR__|$(datadir)|g' $< > $@
+	chmod +x $@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

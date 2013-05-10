@@ -29,21 +29,15 @@
 
 ;;; Code:
 
-(load-from-path "protocol.scm")
-(load-from-path "logger.scm")
-(load-from-path "notify-bus.scm")
-(load-from-path "wget.scm")
-(load-from-path "awlist.scm")
-
 (define-module (awget awgetd)
   #:use-module (oop goops)
   #:use-module (ice-9 rdelim)
   #:use-module (ice-9 threads)
   #:use-module (awget protocol)
   #:use-module (awget awlist)
-  #:use-module (unix logger)
-  #:use-module (unix notify-bus)
-  #:use-module (unix wget)
+  #:use-module (awget util logger)
+  #:use-module (awget util notify-bus)
+  #:use-module (awget util wget)
   #:export (<awgetd> run))
 
 (define *program-name* "awgetd")

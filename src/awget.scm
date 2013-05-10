@@ -1,5 +1,6 @@
 #!/bin/sh
 # aside from this initial boilerplate, this is actually -*- scheme -*- code
+export GUILE_LOAD_PATH=__DATA_DIR__
 main='(module-ref (resolve-module '\''(awget awget)) '\'main')'
 exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
 !#
@@ -57,17 +58,13 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
 
 ;;; Code:
 
-(load-from-path "logger")
-(load-from-path "awgetd")
-(load-from-path "protocol.scm")
-
 (define-module (awget awget)
   #:use-module (oop goops)
   #:use-module (ice-9 getopt-long)
   #:use-module (ice-9 format)
-  #:use-module (unix logger)
   #:use-module (awget protocol)
   #:use-module (awget awgetd)
+  #:use-module (awget util logger)
   #:export     (<awget> main))
 
 (define *program-name*    "awget")
