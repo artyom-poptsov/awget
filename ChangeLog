@@ -1,5 +1,7 @@
 2013-05-10  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
+	* README: Update.
+
 	Improve way of working with Guile modules system.
 
 	* src/awget: Rename to awget.scm.  Fix usage of Guile modules.

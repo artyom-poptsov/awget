@@ -23,20 +23,8 @@ contains annoying bugs.
 Because of beta status, you should go through some additional steps to
 try awget in the action.
 
-First of all, add a directory with awget sources to the Guile load
-path:
-
-  $ export GUILE_LOAD_PATH=${GUILE_LOAD_PATH}:~/bin/awget
-
-or
-
-  $ export GUILE_LOAD_PATH=${GUILE_LOAD_PATH}:/usr/local/share/awget
-
-if you've installed awget (see the next section).  You can put this in
-/etc/profile or shell's config file in your home directory.
-
-Then create the /var/run/awget dir in which awget will store its .pid
-file to track daemon status:
+First of all, create the /var/run/awget dir in which awget will store
+its .pid file to track daemon status:
 
   $ su -
   # mkdir /var/run/awget
