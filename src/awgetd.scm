@@ -33,9 +33,14 @@
   #:use-module (oop goops)
   #:use-module (ice-9 rdelim)
   #:use-module (ice-9 threads)
+
+  ;; Logging
+  #:use-module (logging logger)
+  #:use-module (logging rotating-log)
+  #:use-module (logging port-log)
+
   #:use-module (awget protocol)
   #:use-module (awget awlist)
-  #:use-module (awget util logger)
   #:use-module (awget util notify-bus)
   #:use-module (awget util wget)
   #:export (<awgetd> run))
@@ -119,7 +124,39 @@
       (set-dir-prefix (get-wget obj) (get-downloads-dir obj)))
 
   (if (file-exists? (get-link-list-file obj))
-      (load-list (get-link-list obj) (get-link-list-file obj))))
+      (load-list (get-link-list obj) (get-link-list-file obj)))
+
+  (setup-logging obj))
+
+
+;;; Helper procedures
+
+(define-method (setup-logging (self <awgetd>))
+  (let ((lgr       (make <logger>))
+        (rotating  (make <rotating-log>
+                     #:num-files 1
+                     #:size-limit 10000
+                     #:file-name "/tmp/awget.log")))
+
+    (let ((err (make <port-log> #:port (current-error-port))))
+      (if (not (debug? self))
+          (begin
+            ;; don't want to see warnings or info on the screen!
+            (disable-log-level! err 'WARN)
+            (disable-log-level! err 'INFO)
+            (disable-log-level! err 'DEBUG)))
+          (add-handler! lgr err))
+
+    ;; add the handlers to our logger
+    (add-handler! lgr rotating)
+    ;; make this the application's default logger
+    (set-default-logger! lgr)
+    (open-log! lgr)))
+
+(define (shutdown-logging)
+  (flush-log)   ;; since no args, it uses the default
+  (close-log!)  ;; since no args, it uses the default
+  (set-default-logger! #f))
 
 
 ;;; Public methods
@@ -147,6 +184,10 @@
               (close-port (current-input-port))
               (close-port (current-output-port))
 
+              (let ((p (open-output-file "/dev/null")))
+                (set-current-output-port p)
+                (set-current-error-port  p))
+
               (setsid)
 
               (register-sighandlers obj)
@@ -167,9 +208,8 @@
 
 (define-method (register-sighandlers (obj <awgetd>))
   (define (handler signum)
-    (logger-message (get-logger obj) 'info
-                    (string-append "Signal " (number->string signum)
-                                   " has been received."))
+    (log-msg 'INFO (string-append "Signal " (number->string signum)
+                                  " has been received."))
     (stop obj))
 
   (sigaction SIGINT  handler)
@@ -188,7 +228,7 @@
 ;; Print the message MESSAGE only if daemon started in debug mode.
 (define-method (debug-message (obj <awgetd>) (message <string>))
   (if (debug? obj)
-      (logger-message (get-logger obj) 'debug message)))
+      (log-msg 'DEBUG message)))
 
 
 (define-method (open-socket (obj <awgetd>))
@@ -254,9 +294,9 @@
       (lambda ()
         (accept socket))
       (lambda (key . args)
-        (logger-message (get-logger obj) 'err "accept() call was interrupted."))))
+        (log-msg 'ERROR "accept() call was interrupted."))))
 
-  (logger-message (get-logger obj) 'info "Daemon started.")
+  (log-msg 'INFO "Daemon started.")
 
   (let ((awget-socket (get-socket obj)))
 
@@ -289,6 +329,7 @@
 
          ((eq? message-type *cmd-quit*)
           (begin
+            (shutdown-logging)
             (close client)
             (break))))
 

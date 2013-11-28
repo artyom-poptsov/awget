@@ -64,7 +64,6 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
   #:use-module (ice-9 format)
   #:use-module (awget protocol)
   #:use-module (awget awgetd)
-  #:use-module (awget util logger)
   #:export     (<awget> main))
 
 (define *program-name*    "awget")
@@ -129,11 +128,7 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
   (set-link-list-file obj (string-append (get-home obj) "/awlist"))
 
   (if (not (file-exists? (get-home obj)))
-      (mkdir (get-home obj)))
-  
-  (set-logger obj (make <logger>
-                    #:ident    *program-name*
-                    #:facility 'user)))
+      (mkdir (get-home obj))))
 
 
 ;;; Public methods
@@ -179,7 +174,6 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
                    #:awget-socket-path (get-socket-path    obj)
                    #:link-list-file    (get-link-list-file obj))))
     (display "Starting awgetd...\n")
-    (logger-message (get-logger obj) 'info "Starting awgetd...")
     (run awgetd)))
 
 ;; List all links in the human-friendly manner.
@@ -202,7 +196,7 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
 ;; Print the message MESSAGE only if daemon started in debug mode.
 (define-method (debug-message (obj <awget>) (message <string>))
   (if (debug? obj)
-      (logger-message (get-logger obj) 'debug message)))
+      (display message)))
 
 ;;; Protocol implementation
 
@@ -279,7 +273,7 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
     (if (eq? debug-wanted #t)
         (begin
           (set-debug-mode awget #t)
-          (debug-message awget "Debug mode enabled")))
+          (debug-message awget "Debug mode enabled.\n")))
 
     (if no-detach-wanted
         (begin

@@ -5,7 +5,7 @@ dist_doc_DATA	= README COPYING AUTHORS ChangeLog
 awget_DATA	= src/awgetd.scm src/awlist.scm src/protocol.scm
 
 awget_utildir	= $(pkgdatadir)/util
-awget_util_DATA	= src/dsv-parser.scm src/logger.scm src/notify-bus.scm \
+awget_util_DATA	= src/dsv-parser.scm src/notify-bus.scm \
 			src/wget.scm
 
 awget: src/awget.scm

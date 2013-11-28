@@ -1,7 +1,11 @@
 2013-11-28  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
-	* src/awgetd.scm (daemonize): Implement `no-detach' mode.
-	* src/awget.scm: Likewise.
+	* src/logger.scm: Remove.
+	* Makefile.am (awget_util_DATA): Remove logger.scm.
+	* Makefile.in: Update.
+	* src/awgetd.scm: Use Guile logger.  Implement `no-detach' mode.
+	* src/awget.scm: Implement `no-detach' mode.  Don't use awget
+	logger.
 	(main): Simplify `cond' clauses.
 
 2013-05-10  Artyom Poptsov  <poptsov.artyom@gmail.com>
