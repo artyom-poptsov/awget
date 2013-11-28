@@ -274,41 +274,34 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
 
     (cond
 
-     ((eq? version-wanted #t)
-      (begin
-        (print-version awget)))
+     (version-wanted
+      (print-version awget))
 
-     ((eq? help-wanted #t)
-      (begin
-        (print-help awget)))
+     (help-wanted
+      (print-help awget))
 
-     ((eq? daemon-wanted #t)
-      (begin
-        (if (not (daemon-started? awget))
-            (daemonize awget)
-            (display "Daemon already started.\n"))))
+     (daemon-wanted
+      (if (not (daemon-started? awget))
+          (daemonize awget)
+          (display "Daemon already started.\n")))
 
-     ((eq? list-wanted #t)
-      (begin
-        (if (not (daemon-started? awget))
-            (daemonize awget))
-        (print-list (get-list awget))
-        (newline)))
+     (list-wanted
+      (if (not (daemon-started? awget))
+          (daemonize awget))
+      (print-list (get-list awget))
+      (newline))
 
-     ((eq? exit-wanted #t)
-      (begin
-        (if (daemon-started? awget)
-            (stop-daemon awget))))
+     (exit-wanted
+      (if (daemon-started? awget)
+          (stop-daemon awget)))
 
-     ((eq? add-link-wanted #t)
-      (begin
-        (if (not (daemon-started? awget))
-            (daemonize awget))
-        (add-link awget arguments)))
+     (add-link-wanted
+      (if (not (daemon-started? awget))
+          (daemonize awget))
+      (add-link awget arguments))
 
-     ((eq? remove-link-wanted)
-      (begin
-        (rem-link awget (string->number current-link)))))
+     (remove-link-wanted
+      (rem-link awget (string->number current-link))))
 
     (quit)))
 
