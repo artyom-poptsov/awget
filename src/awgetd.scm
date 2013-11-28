@@ -65,6 +65,11 @@
    #:setter set-socket
    #:getter get-socket)
 
+  (no-detach-mode
+   #:getter no-detach?
+   #:init-keyword #:no-detach-mode
+   #:init-value #f)
+
   (debug-mode
    #:getter debug?
    #:init-keyword #:debug-mode
@@ -128,22 +133,30 @@
 
 ;; Fork the process and start the main loop.
 (define-method (daemonize (obj <awgetd>))
-  (let ((pid (primitive-fork)))
-  (if (zero? pid)
+  (if (no-detach? obj)
+
       (begin
-        (close-port (current-input-port))
-        (close-port (current-output-port))
-
-        (setsid)
-
-        (register-sighandlers obj)
-
         (open-socket   obj)
         (start-aworker obj)
+        (create-pid-file obj (getpid))
         (main-loop     obj))
-      (begin
-        (create-pid-file obj pid)
-        (quit)))))
+
+      (let ((pid (primitive-fork)))
+        (if (zero? pid)
+            (begin
+              (close-port (current-input-port))
+              (close-port (current-output-port))
+
+              (setsid)
+
+              (register-sighandlers obj)
+
+              (open-socket   obj)
+              (start-aworker obj)
+              (main-loop     obj))
+            (begin
+              (create-pid-file obj pid)
+              (quit))))))
 
 (define-method (stop (obj <awgetd>))
   (close-socket obj)

@@ -107,7 +107,12 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
    #:setter set-debug-mode
    #:getter debug?
    #:init-value #f)
-  
+
+  (no-detach-mode
+   #:setter set-no-detach-mode
+   #:getter no-detach?
+   #:init-value #f)
+
   (version
    #:setter set-version
    #:getter get-version
@@ -151,6 +156,7 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
     "\t" "-d, --daemon   Start the awget daemon (awgetd).\n"
     "\t" "-x, --exit     Stop daemon.\n"
     "\t" "--debug        Debug mode.  Normally you should'n use this.\n"
+    "\t" "--no-detach    No-Detach mode.  Normally you should'n use this.\n"
     "\n"
     "Download management:\n"
     "\t" "-a, --add      Add a new link.\n"
@@ -166,6 +172,7 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
 (define-method (daemonize (obj <awget>))
   (let* ((socket-path (get-socket-path obj))
          (awgetd (make <awgetd>
+                   #:no-detach-mode    (no-detach?         obj)
                    #:debug-mode        (debug?             obj)
                    #:awget-home        (get-home           obj)
                    #:awget-pid-file    (get-pid-file       obj)
@@ -246,6 +253,7 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
       (version (single-char #\v) (value #f))
       (help    (single-char #\h) (value #f))
       (debug                     (value #f))
+      (no-detach                 (value #f))
       ;; Link management
       (add     (single-char #\a) (value #f))
       (link    (single-char #\n) (value #t))
@@ -259,6 +267,7 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
          (daemon-wanted  (option-ref options 'daemon  #f))
          (exit-wanted    (option-ref options 'exit    #f))
          (debug-wanted   (option-ref options 'debug   #f))
+         (no-detach-wanted (option-ref options 'no-detach #f))
 
          (add-link-wanted    (option-ref options 'add    #f))
          (list-wanted        (option-ref options 'list   #f))
@@ -271,6 +280,11 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
         (begin
           (set-debug-mode awget #t)
           (debug-message awget "Debug mode enabled")))
+
+    (if no-detach-wanted
+        (begin
+          (set-no-detach-mode awget #t)
+          (debug-message awget "No-Detach mode enabled.")))
 
     (cond
 

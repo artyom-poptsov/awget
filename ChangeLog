@@ -1,6 +1,8 @@
 2013-11-28  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
-	* src/awget.scm (main): Simplify `cond' clauses.
+	* src/awgetd.scm (daemonize): Implement `no-detach' mode.
+	* src/awget.scm: Likewise.
+	(main): Simplify `cond' clauses.
 
 2013-05-10  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
