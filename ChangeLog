@@ -1,3 +1,9 @@
+2013-11-29  Artyom Poptsov  <poptsov.artyom@gmail.com>
+
+	* Makefile.in, aclocal.m4, configure, install-sh, depcomp,
+	missing: Remove.
+
+
 2013-11-28  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
 	* src/logger.scm: Remove.
