@@ -19,6 +19,8 @@
 
 AC_INIT([awget], [0.1], [poptsov.artyom@gmail.com])
 
+AC_CONFIG_AUX_DIR([build-aux])
+
 GUILE_FLAGS
 GUILE_PROGS
 

@@ -1,5 +1,8 @@
 2013-11-29  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
+	* configure.ac: Set `AC_CONFIG_AUX_DIR'.
+	* INSTALL: Update.
+
 	* Makefile.in, aclocal.m4, configure, install-sh, depcomp,
 	missing: Remove.
 
