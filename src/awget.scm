@@ -309,7 +309,9 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
       (add-link awget arguments))
 
      (remove-link-wanted
-      (rem-link awget (string->number current-link))))
+      (if current-link
+          (rem-link awget (string->number current-link))
+          (error "No link is selected."))))
 
     (quit)))
 

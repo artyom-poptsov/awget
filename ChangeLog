@@ -1,5 +1,8 @@
 2013-11-30  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
+	* src/awget.scm (main): Make sure that a link is selected before
+	removing of it.
+
 	* src/awlist.scm: Turn to singleton.
 	(add-link): Rename to `awlist-add!'.  All callers updated.
 	(set-done): Rename to `awlist-set-done!'.  All callers updated.
