@@ -98,10 +98,6 @@
    #:init-keyword #:downloads-dir
    #:init-value #f)
 
-  (link-list
-   #:setter set-link-list
-   #:getter get-link-list)
-
   (link-list-file
    #:setter set-link-list-file
    #:getter get-link-list-file
@@ -117,14 +113,12 @@
   (set-notify-bus obj (make <notify-bus>
                     #:app-name *program-name*))
 
-  (set-link-list obj (make <awlist>))
-
   (set-wget obj (make <wget>))
   (if (not (eq? (get-downloads-dir obj) #f))
       (set-dir-prefix (get-wget obj) (get-downloads-dir obj)))
 
   (if (file-exists? (get-link-list-file obj))
-      (load-list (get-link-list obj) (get-link-list-file obj)))
+      (awlist-load (get-link-list-file obj)))
 
   (setup-logging obj))
 
@@ -201,7 +195,7 @@
 
 (define-method (stop (obj <awgetd>))
   (close-socket obj)
-  (save-list (get-link-list obj) (get-link-list-file obj))
+  (awget-save (get-link-list-file obj))
   (remove-pid-file obj)
   (quit))
 
@@ -246,10 +240,10 @@
 ;; Add new link LINK to the download queue
 (define-method (add-link (obj <awgetd>) (link <string>))
   (debug-message obj (string-append "New link: " link))
-  (add-link (get-link-list obj) link))
+  (awlist-add! link))
 
 (define-method (rem-link (obj <awgetd>) (link-id <number>))
-  (rem-link (get-link-list obj) link-id))
+  (awlist-rem! link-id))
 
 (define-method (send-message (obj <awgetd>) message (port <port>))
   (write message port)
@@ -263,19 +257,18 @@
 
 ;; Constantly look through the queue and download uncompleted links.
 (define-method (aworker-main-loop (obj <awgetd>))
-  (let ((link-list  (get-link-list obj))
-        (wget       (get-wget obj))
+  (let ((wget       (get-wget obj))
         (notify-bus (get-notify-bus obj)))
 
     (define (download record)
       (let ((id   (string->number (list-ref record 0)))
             (link (list-ref record 3)))
         (get-url  wget      link)
-        (set-done link-list id)
+        (awlist-set-done! id)
         (notify-send notify-bus 'low "Download finished:" link)))
 
     (while #t
-      (let ((uncompleted (get-uncompleted link-list)))
+      (let ((uncompleted (awlist-get-uncompleted)))
         (if (not (null? uncompleted))
             (begin
               (debug-message obj "Great! Some work should be done.")
@@ -320,8 +313,7 @@
             (add-link obj (object->string (car message-body)))))
 
          ((eq? message-type *cmd-get-list*)
-          (send-message obj
-                        (get-list (get-link-list obj)) client))
+          (send-message obj (awlist-get) client))
 
          ((eq? message-type *cmd-rem-link*)
           (let ((link-id (cadr message)))

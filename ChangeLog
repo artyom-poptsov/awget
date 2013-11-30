@@ -1,3 +1,17 @@
+2013-11-30  Artyom Poptsov  <poptsov.artyom@gmail.com>
+
+	* src/awlist.scm: Turn to singleton.
+	(add-link): Rename to `awlist-add!'.  All callers updated.
+	(set-done): Rename to `awlist-set-done!'.  All callers updated.
+	(rem-link): Rename to `awlist-rem!'.  All callers updated.
+	(get-list): Rename to `awlist-get'.  All callers updated.
+	(get-uncompleted): Rename to `awlist-get-uncompleted'.  All
+	callers updated.
+	(clear): Rename to `awlist-clear!'.  All callers updated.
+	(load-list): Rename to `awlist-load'.  All callers updated.
+	(save-list): Rename to `awlist-save'.  All callers updated.
+	* src/awgetd.scm: Update.
+
 2013-11-29  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
 	* configure.ac: Set `AC_CONFIG_AUX_DIR'.

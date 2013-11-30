@@ -19,20 +19,7 @@
 
 
 ;;; Commentary:
-
 ;; awget link list.
-;; 
-;; These methods are exported:
-;; 
-;;   (add-link obj link)
-;;   (rem-link obj id)
-;;   (set-done obj id)
-;;   (get-list obj)
-;;   (get-uncompleted obj)
-;;   (clear obj)
-;;   (save-list obj file-name)
-;;   (load-list obj file-name)
-;;
 
 
 ;;; Code:
@@ -41,17 +28,14 @@
   #:use-module (oop goops)
   #:use-module (awget util dsv-parser)
   #:use-module (ice-9 common-list)
-  #:export (<awlist> add-link
-                     rem-link
-                     set-done
-                     get-list
-                     get-uncompleted
-                     clear
-                     save-list
-                     load-list))
-
-
-;;; Main class
+  #:export (awlist-add!
+            awlist-rem!
+            awlist-set-done!
+            awlist-get
+            awlist-get-uncompleted
+            awlist-clear!
+            awlist-save
+            awlist-load))
 
 (define-class <awlist> ()
   (link-list
@@ -72,58 +56,62 @@
   (next-method)
   (set-mutex obj (make-mutex)))
 
+;; Create the list.
+(define awlist (make <awlist>))
+
 
 ;;; Public methods
 
-;; Add new link LINK to the list.
-(define-method (add-link (obj <awlist>) (link <string>))
-  (lock-mutex (get-mutex obj))
-  (let* ((record-number (1+ (get-last-record-number obj)))
+(define (awlist-add! link)
+  "Add new link LINK to the list."
+  (lock-mutex (get-mutex awlist))
+  (let* ((record-number (1+ (get-last-record-number awlist)))
          (tstamp        (current-time))
          (record        (list
                          (number->string record-number)
                          (number->string tstamp)
                          "x" link)))
 
-    (set-last-record-number obj record-number)
+    (set-last-record-number awlist record-number)
 
-    (set-link-list obj (append (get-link-list obj) (list record))))
+    (set-link-list awlist (append (get-link-list awlist) (list record))))
 
-  (unlock-mutex (get-mutex obj)))
+  (unlock-mutex (get-mutex awlist)))
 
-;; Mark a link with id ID as done.
-(define-method (set-done (obj <awlist>) (id <number>))
-  (lock-mutex (get-mutex obj))
+;; 
+(define (awlist-set-done! id)
+  "Mark a link with id ID as done."
+  (lock-mutex (get-mutex awlist))
 
-  (let ((rec (assoc (number->string id) (get-link-list obj))))
+  (let ((rec (assoc (number->string id) (get-link-list awlist))))
     (if (not (eq? rec #f))
         ;; TODO: Remove hardcoded value
         (list-set! rec 2 (number->string (current-time)))))
 
-  (unlock-mutex (get-mutex obj)))
+  (unlock-mutex (get-mutex awlist)))
 
-;; Remove a link with id ID.
-(define-method (rem-link (obj <awlist>) (id <number>))
-  (lock-mutex (get-mutex obj))
-  (set-link-list obj (remove-if (lambda (element)
-                                  (= (string->number (car element)) id))
-                                (get-link-list obj)))
-  (unlock-mutex (get-mutex obj)))
+(define (awlist-rem! id)
+  "Remove a link with id ID."
+  (lock-mutex (get-mutex awlist))
+  (set-link-list awlist (remove-if (lambda (element)
+                                     (= (string->number (car element)) id))
+                                   (get-link-list awlist)))
+  (unlock-mutex (get-mutex awlist)))
 
-(define-method (get-list (obj <awlist>))
-  (lock-mutex (get-mutex obj))
-  (let ((link-list (get-link-list obj)))
-    (unlock-mutex (get-mutex obj))
+(define (awlist-get)
+  (lock-mutex (get-mutex awlist))
+  (let ((link-list (get-link-list awlist)))
+    (unlock-mutex (get-mutex awlist))
     link-list))
 
-;; Get list of uncompleted downloads.
-(define-method (get-uncompleted (obj <awlist>))
-  (lock-mutex (get-mutex obj))
+(define (awlist-get-uncompleted)
+  "Get list of uncompleted downloads."
+  (lock-mutex (get-mutex awlist))
 
-  (let ((link-list   (get-link-list obj))
+  (let ((link-list   (get-link-list awlist))
         (uncompleted '()))
 
-    (unlock-mutex (get-mutex obj))
+    (unlock-mutex (get-mutex awlist))
 
     (for-each
      (lambda (record)
@@ -132,24 +120,24 @@
      link-list)
     uncompleted))
 
-;; Clear the link list.
-(define-method (clear (obj <awlist>))
-  (lock-mutex (get-mutex obj))
-  (set-link-list obj '())
-  (unlock-mutex (get-mutex obj)))
+(define (awlist-clear!)
+  "Clear the link list."
+  (lock-mutex (get-mutex awlist))
+  (set-link-list awlist '())
+  (unlock-mutex (get-mutex awlist)))
 
-;; Save the link list to a file FILE-NAME.
-(define-method (save-list (obj <awlist>) (file-name <string>))
+(define (awlist-save file-name)
+  "Save the link list to a file FILE-NAME."
   (let ((file-port (open-output-file file-name)))
-    (dsv-write (get-link-list obj) file-port)))
+    (dsv-write (get-link-list awlist) file-port)))
 
-;; Load a link list from a file FILE-NAME.
-(define-method (load-list (obj <awlist>) (file-name <string>))
+(define (awlist-load file-name)
+  "Load a link list from a file FILE-NAME."
   (let ((file-port (open-input-file file-name)))
-    (set-link-list obj (dsv-read file-port)))
+    (set-link-list awlist (dsv-read file-port)))
 
-  (if (not (null? (get-link-list obj)))
-      (let ((last-rec (car (reverse (get-link-list obj)))))
-        (set-last-record-number obj (string->number (car last-rec))))))
+  (if (not (null? (get-link-list awlist)))
+      (let ((last-rec (car (reverse (get-link-list awlist)))))
+        (set-last-record-number awlist (string->number (car last-rec))))))
 
 ;;; awlist.scm ends here.
