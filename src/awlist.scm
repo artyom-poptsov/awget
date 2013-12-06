@@ -56,6 +56,9 @@
   (next-method)
   (set-mutex obj (make-mutex)))
 
+;; Index of the timestamp
+(define *link-ts-idx* 2)
+
 ;; Create the list.
 (define awlist (make <awlist>))
 
@@ -78,15 +81,13 @@
 
   (unlock-mutex (get-mutex awlist)))
 
-;; 
 (define (awlist-set-done! id)
   "Mark a link with id ID as done."
   (lock-mutex (get-mutex awlist))
 
   (let ((rec (assoc (number->string id) (get-link-list awlist))))
-    (if (not (eq? rec #f))
-        ;; TODO: Remove hardcoded value
-        (list-set! rec 2 (number->string (current-time)))))
+    (if rec
+        (list-set! rec *link-ts-idx* (number->string (current-time)))))
 
   (unlock-mutex (get-mutex awlist)))
 

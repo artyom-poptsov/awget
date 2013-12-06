@@ -1,3 +1,8 @@
+2013-12-06  Artyom Poptsov  <poptsov.artyom@gmail.com>
+
+	* src/awlist.scm (awlist-set-done!): Simpify checks.  Remove
+	hardcoded values.
+
 2013-11-30  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
 	* src/awget.scm (main): Make sure that a link is selected before
