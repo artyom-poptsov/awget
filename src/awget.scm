@@ -98,10 +98,6 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
    #:setter set-link-list-file
    #:getter get-link-list-file)
 
-  (logger
-   #:setter set-logger
-   #:getter get-logger)
-  
   (debug-mode
    #:setter set-debug-mode
    #:getter debug?
