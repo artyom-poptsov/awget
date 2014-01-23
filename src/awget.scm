@@ -150,24 +150,25 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
 
 (define (print-help)
   (display
-   (string-append
-    "awget download manager (version " *program-version* ")\n\n"
-    "Usage:\n"
-    "\t" *program-name* " [options]\n"
-    "\n"
-    "General options:\n"
-    "\t" "-h, --help     Print this message and exit.\n"
-    "\t" "-v, --version  Print program version and exit.\n"
-    "\t" "-d, --daemon   Start the awget daemon (awgetd).\n"
-    "\t" "-x, --exit     Stop daemon.\n"
-    "\t" "--debug        Debug mode.  Normally you should'n use this.\n"
-    "\t" "--no-detach    No-Detach mode.  Normally you should'n use this.\n"
-    "\n"
-    "Download management:\n"
-    "\t" "-a, --add      Add a new link.\n"
-    "\t" "-n, --link     Set current link.\n"
-    "\t" "-l, --list     List all links.\n"
-    "\t" "-r, --remove   Remove the current link.\n")))
+   (string-append "\
+awget download manager (version " *program-version* ")
+
+Usage: " *program-name* " [options]
+
+General options:
+  --help, -h             Print this message and exit.
+  --version, -v          Print program version and exit.
+  --daemon, -d           Start the awget daemon (awgetd).
+  --exit, -x             Stop daemon.
+  --debug                Debug mode.  Normally you should not use this.
+  --no-detach            No-Detach mode.  Normally you should not use this.
+
+Download management:
+  --add, -a              Add a new link.
+  --link, -n             Set current link.
+  --list, -l             List all links.
+  --remove, -r           Remove the current link.
+")))
 
 (define (daemon-started?)
   "Check if awgetd is started."

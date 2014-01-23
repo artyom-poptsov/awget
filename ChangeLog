@@ -2,6 +2,7 @@
 
 	* src/awget.scm: Simplify the architecture.  Change default
 	pathes to honor XDG specs.
+	(print-help): Improve.
 
 	* src/awgetd.scm (stop): Fix a bug: call `awlist-save' instead of
 	nonexistent procedure `awget-save'.
