@@ -1,5 +1,8 @@
 2014-01-23  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
+	* src/awgetd.scm (stop): Fix a bug: call `awlist-save' instead of
+	nonexistent procedure `awget-save'.
+
 	* src/awget.scm (<awget>): Remove unused slots.
 
 2013-12-06  Artyom Poptsov  <poptsov.artyom@gmail.com>

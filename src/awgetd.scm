@@ -195,7 +195,7 @@
 
 (define-method (stop (obj <awgetd>))
   (close-socket obj)
-  (awget-save (get-link-list-file obj))
+  (awlist-save (get-link-list-file obj))
   (remove-pid-file obj)
   (quit))
 
