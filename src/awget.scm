@@ -64,80 +64,94 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
   #:use-module (ice-9 format)
   #:use-module (awget protocol)
   #:use-module (awget awgetd)
-  #:export     (<awget> main))
+  #:export     (main))
 
 (define *program-name*    "awget")
 (define *program-version* "v0.1")
 
-
-;;; Main class
+;;; Honor the XDG specs
+;; <http://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html>
 
-(define-class <awget> ()
-  (awget-home
-   #:setter set-home
-   #:getter get-home
-   #:init-keyword #:home
-   #:init-value (string-append (getenv "HOME") "/." *program-name*))
+(define awget-data-home
+  (format #f "~a/.local/share/~a" (getenv "HOME") *program-name*))
 
-  (awget-pid-file
-   #:setter set-pid-file
-   #:getter get-pid-file
-   #:init-keyword #:awget-pid-file)
+(define awget-config-home
+  (format #f "~a/.config/~a" (getenv "HOME") *program-name*))
 
-  (awget-socket-path
-   #:setter set-socket-path
-   #:getter get-socket-path
-   #:init-keyword #:awget-socket-path)
+(define awget-runtime-home
+  (format #f "~a/.cache/~a" (getenv "HOME") *program-name*))
 
-  (awget-downloads-dir
-   #:setter set-downloads-dir
-   #:getter get-downloads-dir
-   #:init-keyword #:downloads-dir)
+;;;
 
-  (awget-link-list-file
-   #:setter set-link-list-file
-   #:getter get-link-list-file)
+(define socket-file
+  (string-append awget-runtime-home "/" *program-name*))
 
-  (debug-mode
-   #:setter set-debug-mode
-   #:getter debug?
-   #:init-value #f)
+(define awlist-file
+  (string-append awget-data-home "/awlist"))
 
-  (no-detach-mode
-   #:setter set-no-detach-mode
-   #:getter no-detach?
-   #:init-value #f)
+(define pid-file
+  (string-append
+   "/var/run/" *program-name*
+   "/" (getenv "USER")
+   "/" *program-name* ".pid"))
 
-  (version
-   #:setter set-version
-   #:getter get-version
-   #:init-value *program-version*))
-
-(define-method (initialize (obj <awget>) args)
-  (next-method)
-
-  (set-pid-file       obj (string-append
-                           "/var/run/" *program-name*
-                           "/" (getenv "USER")
-                           "/" *program-name* ".pid"))
-  (set-socket-path    obj (string-append (get-home obj) "/" *program-name*))
-  (set-link-list-file obj (string-append (get-home obj) "/awlist"))
-
-  (if (not (file-exists? (get-home obj)))
-      (mkdir (get-home obj))))
+(define debug-mode?     #f)
+(define no-detach-mode? #f)
 
 
-;;; Public methods
+;;; Helper procedures
 
-(define-method (print-version (obj <awget>))
+(define (print-pathes)
+  "Print pathes used by the program."
+  (display   "----- pathes -----\n")
+  (format #t "data-home:    ~a~%" awget-data-home)
+  (format #t "config-home:  ~a~%" awget-config-home)
+  (format #t "runtime-home: ~a~%" awget-runtime-home)
+  (format #t "socket-file:  ~a~%" socket-file)
+  (format #t "awlist-file:  ~a~%" awlist-file)
+  (display   "------------------\n"))
+
+(define (print-list list)
+  "List all links in the human-friendly manner."
+  (let ((fmt "~5a ~15a ~a\n"))
+    (format #t fmt "ID" "Status" "Link")
+    (for-each
+     (lambda (line)
+       (format
+        #t
+        fmt
+        (list-ref line 0)
+        (if (string=? (list-ref line 2) "x")
+            "Downloading"
+            "Done")
+        (list-ref line 3)))
+     list)))
+
+(define (debug-message message)
+  "Print the message MESSAGE only if daemon started in debug mode."
+  (if debug-mode?
+      (display message)))
+
+(define (make-all-dirs)
+  (define (mkdir-if-not-exists dir)
+    (if (not (file-exists? dir)) (mkdir dir)))
+
+  (mkdir-if-not-exists awget-data-home)
+  (mkdir-if-not-exists awget-config-home)
+  (mkdir-if-not-exists awget-runtime-home))
+
+
+;;; Procedures
+
+(define (print-version)
   (display
    (string-append
-    "awget download manager (version " (get-version obj) ")\n")))
+    "awget download manager (version " *program-version* ")\n")))
 
-(define-method (print-help (obj <awget>))
+(define (print-help)
   (display
    (string-append
-    "awget download manager (version " (get-version obj) ")\n\n"
+    "awget download manager (version " *program-version* ")\n\n"
     "Usage:\n"
     "\t" *program-name* " [options]\n"
     "\n"
@@ -155,52 +169,30 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
     "\t" "-l, --list     List all links.\n"
     "\t" "-r, --remove   Remove the current link.\n")))
 
-(define-method (daemon-started? (obj <awget>))
-  (file-exists? (get-pid-file obj)))
+(define (daemon-started?)
+  "Check if awgetd is started."
+  (file-exists? pid-file))
 
 
-;; Run the awgetd
-(define-method (daemonize (obj <awget>))
-  (let* ((socket-path (get-socket-path obj))
-         (awgetd (make <awgetd>
-                   #:no-detach-mode    (no-detach?         obj)
-                   #:debug-mode        (debug?             obj)
-                   #:awget-home        (get-home           obj)
-                   #:awget-pid-file    (get-pid-file       obj)
-                   #:awget-socket-path (get-socket-path    obj)
-                   #:link-list-file    (get-link-list-file obj))))
+(define (daemonize)
+  "Run the awgetd"
+  (let* ((awgetd (make <awgetd>
+                   #:no-detach-mode    no-detach-mode?
+                   #:debug-mode        debug-mode?
+                   #:awget-home        awget-data-home
+                   #:awget-pid-file    pid-file
+                   #:awget-socket-path socket-file
+                   #:link-list-file    awlist-file)))
     (display "Starting awgetd...\n")
     (run awgetd)))
 
-;; List all links in the human-friendly manner.
-(define (print-list list)
-  (let ((fmt "~5a ~15a ~a\n"))
-    (format #t fmt "ID" "Status" "Link")
-    (for-each
-     (lambda (line)
-       (format
-        #t
-        fmt
-        (list-ref line 0)
-        (if (string=? (list-ref line 2) "x")
-            "Downloading"
-            "Done")
-        (list-ref line 3)))
-     list)))
-
-
-;; Print the message MESSAGE only if daemon started in debug mode.
-(define-method (debug-message (obj <awget>) (message <string>))
-  (if (debug? obj)
-      (display message)))
-
 ;;; Protocol implementation
 
-(define-method (send-message (obj  <awget>) (type <number>) message)
+(define (send-message type message)
   (let ((message (list type message))
         (server-port (socket PF_UNIX SOCK_STREAM 0)))
 
-    (connect server-port AF_UNIX (get-socket-path obj))
+    (connect server-port AF_UNIX socket-file)
 
     ;; Send the message
     (display message server-port)
@@ -211,30 +203,30 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
       (close server-port)
       response)))
 
-(define-method (stop-daemon (obj <awget>))
-  (send-message obj *cmd-quit* #f))
+(define (stop-daemon)
+  (send-message *cmd-quit* #f))
 
-;; Get a download queue
-(define-method (get-list (obj <awget>))
-  (send-message obj *cmd-get-list* #f))
+(define (get-list)
+  "Get a download queue"
+  (send-message *cmd-get-list* #f))
 
-;; Send a link LINK to the awgetd.
-(define-method (send-link-to-daemon (obj <awget>) (link <string>))
-  (send-message obj *cmd-add-link* link))
+(define (send-link-to-daemon link)
+  "Send a link LINK to the awgetd."  
+  (send-message *cmd-add-link* link))
 
-;; Add list of links to download queue
-(define-method (add-link (obj <awget>) (link-list <list>))
-  (for-each (lambda (link) (send-link-to-daemon obj link))
+(define (add-link link-list)
+  "Add list of links to download queue"
+  (for-each (lambda (link) (send-link-to-daemon link))
             link-list))
 
-(define-method (rem-link (obj <awget>) (link-id <number>))
-  (send-message obj *cmd-rem-link* link-id))
+(define (rem-link link-id)
+  (send-message *cmd-rem-link* link-id))
 
 
 ;;; Program entry point
 
-;; Parse arguments and run awget
 (define (main . args)
+  "Entry point of the program."
 
   (define *option-spec*
     '(;; General options
@@ -250,8 +242,9 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
       (list    (single-char #\l) (value #f))
       (remove  (single-char #\r) (value #f))))
 
-  (let* ((awget          (make <awget>))
-         (options        (getopt-long args *option-spec*))
+  (make-all-dirs)
+
+  (let* ((options        (getopt-long args *option-spec*))
          (help-wanted    (option-ref options 'help    #f))
          (version-wanted (option-ref options 'version #f))
          (daemon-wanted  (option-ref options 'daemon  #f))
@@ -268,45 +261,50 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
 
     (if (eq? debug-wanted #t)
         (begin
-          (set-debug-mode awget #t)
-          (debug-message awget "Debug mode enabled.\n")))
+          (set! debug-mode? #t)
+          (debug-message "Debug mode enabled.\n")))
 
     (if no-detach-wanted
         (begin
-          (set-no-detach-mode awget #t)
-          (debug-message awget "No-Detach mode enabled.")))
+          (set! no-detach-mode? #t)
+          (debug-message "No-Detach mode enabled.\n")))
+
+    (if debug-mode?
+        (print-pathes))
 
     (cond
 
      (version-wanted
-      (print-version awget))
+      (print-version)
+      (exit))
 
      (help-wanted
-      (print-help awget))
+      (print-help)
+      (exit))
 
      (daemon-wanted
-      (if (not (daemon-started? awget))
-          (daemonize awget)
+      (if (not (daemon-started?))
+          (daemonize)
           (display "Daemon already started.\n")))
 
      (list-wanted
-      (if (not (daemon-started? awget))
+      (if (not (daemon-started?))
           (daemonize awget))
-      (print-list (get-list awget))
+      (print-list (get-list))
       (newline))
 
      (exit-wanted
-      (if (daemon-started? awget)
-          (stop-daemon awget)))
+      (if (daemon-started?)
+          (stop-daemon)))
 
      (add-link-wanted
-      (if (not (daemon-started? awget))
-          (daemonize awget))
-      (add-link awget arguments))
+      (if (not (daemon-started?))
+          (daemonize))
+      (add-link arguments))
 
      (remove-link-wanted
       (if current-link
-          (rem-link awget (string->number current-link))
+          (rem-link (string->number current-link))
           (error "No link is selected."))))
 
     (quit)))

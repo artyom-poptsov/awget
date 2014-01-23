@@ -1,5 +1,8 @@
 2014-01-23  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
+	* src/awget.scm: Simplify the architecture.  Change default
+	pathes to honor XDG specs.
+
 	* src/awgetd.scm (stop): Fix a bug: call `awlist-save' instead of
 	nonexistent procedure `awget-save'.
 
