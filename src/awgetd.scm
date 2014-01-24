@@ -51,9 +51,24 @@
 ;;; Main class
 
 (define-class <awgetd> ()
-  (awget-home
-   #:getter get-home
-   #:init-keyword #:awget-home)
+  ;; Directories
+  (data-home
+   ;; User's data directory.
+   #:getter get-data-home
+   #:init-keyword #:data-home)
+  (config-home
+   ;; Directory to store configuration files.
+   #:getter get-config-home
+   #:init-keyword #:config-home)
+  (runtime-home
+   ;; Directory for temporary files.
+   #:getter get-runtime-home
+   #:init-keyword #:runtime-home)
+  (downloads-dir
+   ;; Default directory to save downloaded files.
+   #:getter get-downloads-dir
+   #:init-keyword #:downloads-dir
+   #:init-value #f)
 
   (awget-pid-file
    #:getter get-pid-file
@@ -88,11 +103,6 @@
   (wget
    #:setter set-wget!
    #:getter get-wget)
-
-  (downloads-dir
-   #:getter get-downloads-dir
-   #:init-keyword #:downloads-dir
-   #:init-value #f)
 
   (link-list-file
    #:getter get-link-list-file

@@ -1,5 +1,9 @@
 2014-01-25  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
+	* src/awgetd.scm (<awgetd>): Remove `awget-home' slot.  Add slots
+	for default directories.
+	* src/awget.scm (daemonize): Set default directories for awgetd.
+
 	* src/awgetd.scm (<awgetd>): Remove unused setters.  Add
 	exclamation mark to setters' names.  All callers updated.
 	(initialize): Update.

@@ -178,9 +178,11 @@ Download management:
 (define (daemonize)
   "Run the awgetd"
   (let* ((awgetd (make <awgetd>
+                   #:data-home         awget-data-home
+                   #:config-home       awget-config-home
+                   #:rutime-home       awget-runtime-home
                    #:no-detach-mode    no-detach-mode?
                    #:debug-mode        debug-mode?
-                   #:awget-home        awget-data-home
                    #:awget-pid-file    pid-file
                    #:awget-socket-path socket-file
                    #:link-list-file    awlist-file)))
