@@ -43,7 +43,7 @@
   #:use-module (awget awlist)
   #:use-module (awget util notify-bus)
   #:use-module (awget util wget)
-  #:export (<awgetd> run))
+  #:export (<awgetd> set-awgetd! run-awgetd))
 
 (define *program-name* "awgetd")
 
@@ -118,14 +118,14 @@
       (set-dir-prefix (get-wget obj) (get-downloads-dir obj)))
 
   (if (file-exists? (get-link-list-file obj))
-      (awlist-load (get-link-list-file obj)))
+      (awlist-load (get-link-list-file obj))))
 
-  (setup-logging obj))
+(define awgetd #f)
 
 
 ;;; Helper procedures
 
-(define-method (setup-logging (self <awgetd>))
+(define-method (setup-logging)
   (let ((lgr       (make <logger>))
         (rotating  (make <rotating-log>
                      #:num-files 1
@@ -133,7 +133,7 @@
                      #:file-name "/tmp/awget.log")))
 
     (let ((err (make <port-log> #:port (current-error-port))))
-      (if (not (debug? self))
+      (if (not (debug? awgetd))
           (begin
             ;; don't want to see warnings or info on the screen!
             (disable-log-level! err 'WARN)
@@ -164,22 +164,27 @@
 
 ;;; Public methods
 
-;; Run the awget daemon.
-(define-method (run (obj <awgetd>))
-  (daemonize obj))
+(define (run-awgetd)
+  "Run the awget daemon."
+  (setup-logging)
+  (daemonize))
+
+(define (set-awgetd! instance)
+  "Set awgetd instance."
+  (set! awgetd instance))
 
 
 ;;; Private methods
 
-;; Fork the process and start the main loop.
-(define-method (daemonize (obj <awgetd>))
-  (if (no-detach? obj)
+(define (daemonize)
+  "Fork the process and start the main loop."
+  (if (no-detach? awgetd)
 
       (begin
-        (open-socket   obj)
-        (start-aworker obj)
-        (create-pid-file obj (getpid))
-        (main-loop     obj))
+        (open-socket)
+        (start-aworker)
+        (create-pid-file (getpid))
+        (main-loop))
 
       (let ((pid (primitive-fork)))
         (if (zero? pid)
@@ -193,74 +198,71 @@
 
               (setsid)
 
-              (register-sighandlers obj)
+              (register-sighandlers)
 
-              (open-socket   obj)
-              (start-aworker obj)
-              (main-loop     obj))
+              (open-socket )
+              (start-aworker)
+              (main-loop))
             (begin
-              (create-pid-file obj pid)
+              (create-pid-file pid)
               (quit))))))
 
-(define-method (stop (obj <awgetd>))
-  (close-socket obj)
-  (awlist-save (get-link-list-file obj))
-  (remove-pid-file obj)
+(define (stop)
+  (close-socket)
+  (awlist-save (get-link-list-file awgetd))
+  (remove-pid-file)
   (quit))
 
 
-(define-method (register-sighandlers (obj <awgetd>))
+(define (register-sighandlers)
   (define (handler signum)
     (fmt-info "Signal ~a has been received." signum)
-    (stop obj))
+    (stop))
 
   (sigaction SIGINT  handler)
   (sigaction SIGHUP  handler)
   (sigaction SIGTERM handler))
 
 
-(define-method (create-pid-file (obj <awgetd>) (pid <number>))
-  (let ((pid-file (open-output-file (get-pid-file obj))))
+(define (create-pid-file pid)
+  (let ((pid-file (open-output-file (get-pid-file awgetd))))
     (write pid pid-file)))
 
-(define-method (remove-pid-file (obj <awgetd>))
-  (delete-file (get-pid-file obj)))
+(define (remove-pid-file)
+  (delete-file (get-pid-file awgetd)))
 
 
-(define-method (open-socket (obj <awgetd>))
-  (set-socket obj (socket PF_UNIX SOCK_STREAM 0))
-  (let ((path         (get-socket-path obj))
-        (awget-socket (get-socket obj)))
+(define (open-socket)
+  (set-socket awgetd (socket PF_UNIX SOCK_STREAM 0))
+  (let ((path         (get-socket-path awgetd))
+        (awget-socket (get-socket awgetd)))
     (bind awget-socket AF_UNIX path)
     (listen awget-socket 1)))
 
-(define-method (close-socket (obj <awgetd>))
-  (close (get-socket obj))
-  (delete-file (get-socket-path obj)))
+(define (close-socket)
+  (close (get-socket awgetd))
+  (delete-file (get-socket-path awgetd)))
 
 
-;; Add new link LINK to the download queue
-(define-method (add-link (obj <awgetd>) (link <string>))
+(define (add-link link)
+  "Add new link LINK to the download queue"
   (fmt-debug "New link: ~a" link)
   (awlist-add! link))
 
-(define-method (rem-link (obj <awgetd>) (link-id <number>))
+(define (rem-link link-id)
   (awlist-rem! link-id))
 
-(define-method (send-message (obj <awgetd>) message (port <port>))
+(define (send-message message port)
   (write message port)
   (newline port))
 
 
 ;; Asynchronous dowloader
 
-(define-method (start-aworker (obj <awgetd>))
-  (make-thread (aworker-main-loop obj)))
-
-;; Constantly look through the queue and download uncompleted links.
-(define-method (aworker-main-loop (obj <awgetd>))
-  (let ((wget       (get-wget obj))
-        (notify-bus (get-notify-bus obj)))
+(define (aworker-main-loop awgetd)
+  "Constantly look through the queue and download uncompleted links."
+  (let ((wget       (get-wget awgetd))
+        (notify-bus (get-notify-bus awgetd)))
 
     (define (download record)
       (let ((id   (string->number (list-ref record 0)))
@@ -279,12 +281,15 @@
               (yield)
               (sleep 1)))))))
 
-
-;; Main loop of the awgetd
-(define-method (main-loop (obj <awgetd>))
+(define (start-aworker)
+  (make-thread (aworker-main-loop awgetd)))
 
-  ;; Wrapper for accept() that catch errors.
+
+(define (main-loop)
+  "Main loop of the awgetd"
+
   (define (awget-accept socket)
+    "Wrapper for accept() that catch errors."
     (catch 'system-error
       (lambda ()
         (accept socket))
@@ -293,7 +298,7 @@
 
   (fmt-info "Daemon started.")
 
-  (let ((awget-socket (get-socket obj)))
+  (let ((awget-socket (get-socket awgetd)))
 
     (while #t
       (let* ((client-connection (awget-accept awget-socket))
@@ -310,15 +315,15 @@
 
          ((eq? message-type *cmd-add-link*)
           (let ((message-body (cdr message)))
-            (send-message obj #t client)
-            (add-link obj (object->string (car message-body)))))
+            (send-message #t client)
+            (add-link (object->string (car message-body)))))
 
          ((eq? message-type *cmd-get-list*)
-          (send-message obj (awlist-get) client))
+          (send-message (awlist-get) client))
 
          ((eq? message-type *cmd-rem-link*)
           (let ((link-id (cadr message)))
-            (rem-link obj link-id)))
+            (rem-link link-id)))
 
          ((eq? message-type *cmd-quit*)
           (begin
@@ -328,6 +333,6 @@
 
         (close client))))
 
-  (stop obj))
+  (stop))
 
 ;;; awgetd.scm ends here.

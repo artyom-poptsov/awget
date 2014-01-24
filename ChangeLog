@@ -1,5 +1,26 @@
 2014-01-25  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
+	* src/awgetd.scm: Simplify the design.
+	(setup-logging): Use the global instance of awgetd.
+	(set-awgetd!): New procedure.
+	(run): Likewise.  Rename to `run-awgetd', all callers updated.
+	Call `setup-logging' here.
+	(daemonize): Likewise.
+	(stop): Likewise.
+	(register-sighandlers): Likewise.
+	(create-pid-file): Likewise.
+	(remove-pid-file): Likewise.
+	(open-socket): Likewise.
+	(close-socket): Likewise.
+	(aworker-main-loop): Likewise.
+	(start-aworker): Likewise.
+	(main-loop): Likewise.
+	(add-link): Don't take awgetd instance as a parameter.
+	(rem-link): Likewise.
+	(send-message): Likewise.
+	* src/awget.scm (daemonize): Set the default instance of the
+	awgetd.
+
 	* src/awgetd.scm: Improve logging.
 	(make-msg-formatter): New procedure.
 	(fmt-info): New procedure.

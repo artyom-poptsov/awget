@@ -184,8 +184,9 @@ Download management:
                    #:awget-pid-file    pid-file
                    #:awget-socket-path socket-file
                    #:link-list-file    awlist-file)))
+    (set-awgetd! awgetd)
     (display "Starting awgetd...\n")
-    (run awgetd)))
+    (run-awgetd)))
 
 ;;; Protocol implementation
 
