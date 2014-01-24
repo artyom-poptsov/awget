@@ -180,7 +180,7 @@ Download management:
   (let* ((awgetd (make <awgetd>
                    #:data-home         awget-data-home
                    #:config-home       awget-config-home
-                   #:rutime-home       awget-runtime-home
+                   #:runtime-home      awget-runtime-home
                    #:no-detach-mode    no-detach-mode?
                    #:debug-mode        debug-mode?
                    #:awget-pid-file    pid-file

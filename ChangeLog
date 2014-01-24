@@ -1,5 +1,7 @@
 2014-01-25  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
+	* src/awget.scm (daemonize): Fix wrong slot name for awgetd.
+
 	* src/awgetd.scm (<awgetd>): Remove `awget-home' slot.  Add slots
 	for default directories.
 	* src/awget.scm (daemonize): Set default directories for awgetd.
