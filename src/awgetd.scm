@@ -152,6 +152,15 @@
   (close-log!)  ;; since no args, it uses the default
   (set-default-logger! #f))
 
+;; Log formatters
+(define (make-msg-formatter prio)
+  "Make a new log formatter with priority PRIO."
+  (lambda (fmt . args) (log-msg prio (format #f fmt args))))
+
+(define fmt-info  (make-msg-formatter 'INFO))
+(define fmt-debug (make-msg-formatter 'DEBUG))
+(define fmt-error (make-msg-formatter 'ERROR))
+
 
 ;;; Public methods
 
@@ -202,8 +211,7 @@
 
 (define-method (register-sighandlers (obj <awgetd>))
   (define (handler signum)
-    (log-msg 'INFO (string-append "Signal " (number->string signum)
-                                  " has been received."))
+    (fmt-info "Signal ~a has been received." signum)
     (stop obj))
 
   (sigaction SIGINT  handler)
@@ -217,12 +225,6 @@
 
 (define-method (remove-pid-file (obj <awgetd>))
   (delete-file (get-pid-file obj)))
-
-
-;; Print the message MESSAGE only if daemon started in debug mode.
-(define-method (debug-message (obj <awgetd>) (message <string>))
-  (if (debug? obj)
-      (log-msg 'DEBUG message)))
 
 
 (define-method (open-socket (obj <awgetd>))
@@ -239,7 +241,7 @@
 
 ;; Add new link LINK to the download queue
 (define-method (add-link (obj <awgetd>) (link <string>))
-  (debug-message obj (string-append "New link: " link))
+  (fmt-debug "New link: ~a" link)
   (awlist-add! link))
 
 (define-method (rem-link (obj <awgetd>) (link-id <number>))
@@ -271,7 +273,7 @@
       (let ((uncompleted (awlist-get-uncompleted)))
         (if (not (null? uncompleted))
             (begin
-              (debug-message obj "Great! Some work should be done.")
+              (fmt-debug "Great! Some work should be done.")
               (for-each download uncompleted))
             (begin
               (yield)
@@ -287,9 +289,9 @@
       (lambda ()
         (accept socket))
       (lambda (key . args)
-        (log-msg 'ERROR "accept() call was interrupted."))))
+        (fmt-error "accept() call was interrupted."))))
 
-  (log-msg 'INFO "Daemon started.")
+  (fmt-info "Daemon started.")
 
   (let ((awget-socket (get-socket obj)))
 
@@ -299,8 +301,7 @@
              (message           (read (open-input-string (read-line client 'trim))))
              (message-type      (car message)))
 
-        (debug-message obj (string-append
-                            "Message type: " (number->string message-type)))
+        (fmt-debug "Message type: ~a" message-type)
 
         (cond
 

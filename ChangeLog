@@ -1,3 +1,13 @@
+2014-01-25  Artyom Poptsov  <poptsov.artyom@gmail.com>
+
+	* src/awgetd.scm: Improve logging.
+	(make-msg-formatter): New procedure.
+	(fmt-info): New procedure.
+	(fmt-debug): New procedure.
+	(fmt-error): New procedure.
+	(register-sighandlers, add-link, main-loop): Improve logging.
+	(debug-message): Remove.
+
 2014-01-23  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
 	* src/awget.scm: Simplify the architecture.  Change default
