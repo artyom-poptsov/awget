@@ -52,22 +52,19 @@
 
 (define-class <awgetd> ()
   (awget-home
-   #:setter set-home
    #:getter get-home
    #:init-keyword #:awget-home)
 
   (awget-pid-file
-   #:setter set-pid-file
    #:getter get-pid-file
    #:init-keyword #:awget-pid-file)
 
   (awget-socket-path
-   #:setter set-socket-path
    #:getter get-socket-path
    #:init-keyword #:awget-socket-path)
 
   (awget-socket
-   #:setter set-socket
+   #:setter set-socket!
    #:getter get-socket)
 
   (no-detach-mode
@@ -81,39 +78,37 @@
    #:init-value   #f)
 
   (logger
-   #:setter set-logger
+   #:setter set-logger!
    #:getter get-logger)
 
   (notify-bus
-   #:setter set-notify-bus
+   #:setter set-notify-bus!
    #:getter get-notify-bus)
 
   (wget
-   #:setter set-wget
+   #:setter set-wget!
    #:getter get-wget)
 
   (downloads-dir
-   #:setter set-downloads-dir
    #:getter get-downloads-dir
    #:init-keyword #:downloads-dir
    #:init-value #f)
 
   (link-list-file
-   #:setter set-link-list-file
    #:getter get-link-list-file
    #:init-keyword #:link-list-file))
 
 (define-method (initialize (obj <awgetd>) args)
   (next-method)
 
-  (set-logger obj (make <logger>
-                    #:ident    *program-name*
-                    #:facility 'daemon))
+  (set-logger! obj (make <logger>
+                     #:ident    *program-name*
+                     #:facility 'daemon))
 
-  (set-notify-bus obj (make <notify-bus>
-                    #:app-name *program-name*))
+  (set-notify-bus! obj (make <notify-bus>
+                         #:app-name *program-name*))
 
-  (set-wget obj (make <wget>))
+  (set-wget! obj (make <wget>))
   (if (not (eq? (get-downloads-dir obj) #f))
       (set-dir-prefix (get-wget obj) (get-downloads-dir obj)))
 
@@ -233,7 +228,7 @@
 
 
 (define (open-socket)
-  (set-socket awgetd (socket PF_UNIX SOCK_STREAM 0))
+  (set-socket! awgetd (socket PF_UNIX SOCK_STREAM 0))
   (let ((path         (get-socket-path awgetd))
         (awget-socket (get-socket awgetd)))
     (bind awget-socket AF_UNIX path)

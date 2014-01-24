@@ -1,5 +1,10 @@
 2014-01-25  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
+	* src/awgetd.scm (<awgetd>): Remove unused setters.  Add
+	exclamation mark to setters' names.  All callers updated.
+	(initialize): Update.
+	(open-socket): Update.
+
 	* src/awgetd.scm: Simplify the design.
 	(setup-logging): Use the global instance of awgetd.
 	(set-awgetd!): New procedure.
@@ -18,6 +23,7 @@
 	(add-link): Don't take awgetd instance as a parameter.
 	(rem-link): Likewise.
 	(send-message): Likewise.
+
 	* src/awget.scm (daemonize): Set the default instance of the
 	awgetd.
 
