@@ -1,5 +1,9 @@
 2014-01-25  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
+	* src/awlist.scm (<awlist>): Add exclamation mark to setters'
+	names.  All callers updated.
+	(awlist-add!, awlist-rem!, awlist-clear!, awlist-load): Update.
+
 	* src/awlist.scm (awlist-get-uncompleted): Use `reduce-init'.
 	(*uncompleted-marker*): New global symbol.
 	(awlist-add!): Use `*uncompleted-marker*'.

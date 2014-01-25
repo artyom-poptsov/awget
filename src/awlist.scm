@@ -39,12 +39,12 @@
 
 (define-class <awlist> ()
   (link-list
-   #:setter set-link-list
+   #:setter set-link-list!
    #:getter get-link-list
    #:init-value '())
 
   (last-record-number
-   #:setter set-last-record-number
+   #:setter set-last-record-number!
    #:getter get-last-record-number
    #:init-value 0)
 
@@ -80,9 +80,9 @@
          (tstamp        (current-time))
          (record        (make-record record-number tstamp link)))
 
-    (set-last-record-number awlist record-number)
+    (set-last-record-number! awlist record-number)
 
-    (set-link-list awlist (append (get-link-list awlist) (list record))))
+    (set-link-list! awlist (append (get-link-list awlist) (list record))))
 
   (unlock-mutex (get-mutex awlist)))
 
@@ -99,7 +99,7 @@
 (define (awlist-rem! id)
   "Remove a link with id ID."
   (lock-mutex (get-mutex awlist))
-  (set-link-list awlist (remove-if (lambda (element)
+  (set-link-list! awlist (remove-if (lambda (element)
                                      (= (string->number (car element)) id))
                                    (get-link-list awlist)))
   (unlock-mutex (get-mutex awlist)))
@@ -133,7 +133,7 @@
 (define (awlist-clear!)
   "Clear the link list."
   (lock-mutex (get-mutex awlist))
-  (set-link-list awlist '())
+  (set-link-list! awlist '())
   (unlock-mutex (get-mutex awlist)))
 
 (define (awlist-save file-name)
@@ -144,10 +144,10 @@
 (define (awlist-load file-name)
   "Load a link list from a file FILE-NAME."
   (let ((file-port (open-input-file file-name)))
-    (set-link-list awlist (dsv-read file-port)))
+    (set-link-list! awlist (dsv-read file-port)))
 
   (if (not (null? (get-link-list awlist)))
       (let ((last-rec (car (reverse (get-link-list awlist)))))
-        (set-last-record-number awlist (string->number (car last-rec))))))
+        (set-last-record-number! awlist (string->number (car last-rec))))))
 
 ;;; awlist.scm ends here.
