@@ -49,12 +49,11 @@
    #:init-value 0)
 
   (mutex
-   #:setter set-mutex
-   #:getter get-mutex))
+   #:getter get-mutex
+   #:init-value (make-mutex)))
 
 (define-method (initialize (obj <awlist>) args)
-  (next-method)
-  (set-mutex obj (make-mutex)))
+  (next-method))
 
 ;; Index of the timestamp
 (define *link-ts-idx* 2)
