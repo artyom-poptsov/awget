@@ -119,7 +119,7 @@
                          #:app-name *program-name*))
 
   (if (not (eq? (get-downloads-dir obj) #f))
-      (set-dir-prefix (get-wget obj) (get-downloads-dir obj)))
+      (set-dir-prefix! (get-wget obj) (get-downloads-dir obj)))
 
   (if (file-exists? (get-link-list-file obj))
       (awlist-load (get-link-list-file obj))))

@@ -1,5 +1,9 @@
 2014-01-25  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
+	* src/wget.scm (<wget>): Add exclamation mark to setters' names.
+	All callers updated.
+	* src/awgetd.scm (initialize): Update.
+
 	* src/wget.scm (<wget>): Add `logfile' slot.
 	(initialize): Create default wget configuration file if it does
 	not exist.

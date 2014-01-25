@@ -34,14 +34,14 @@
 (define-module (awget util wget)
   #:use-module (oop goops)
   #:export     (<wget> get-url
-                       set-dir-prefix))
+                       set-dir-prefix!))
 
 
 ;;; Main class
 
 (define-class <wget> ()
   (dir-prefix
-   #:setter set-dir-prefix
+   #:setter set-dir-prefix!
    #:getter get-dir-prefix
    #:init-value #f
    #:init-keyword #:dir-prefix)
@@ -52,7 +52,7 @@
    #:init-keyword #:logfile)
 
   (config
-   #:setter set-config
+   #:setter set-config!
    #:getter get-config
    #:init-value #f
    #:init-keyword #:config))
