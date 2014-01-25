@@ -67,15 +67,18 @@
 
 ;;; Public methods
 
+(define (make-record number timestamp link)
+  "Create a new record for uncompleted job."
+  (list (number->string number)
+        (number->string timestamp)
+        *uncompleted-marker* link))
+
 (define (awlist-add! link)
   "Add new link LINK to the list."
   (lock-mutex (get-mutex awlist))
   (let* ((record-number (1+ (get-last-record-number awlist)))
          (tstamp        (current-time))
-         (record        (list
-                         (number->string record-number)
-                         (number->string tstamp)
-                         *uncompleted-marker* link)))
+         (record        (make-record record-number tstamp link)))
 
     (set-last-record-number awlist record-number)
 
