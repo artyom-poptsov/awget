@@ -1,5 +1,13 @@
 2014-01-25  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
+	* src/notify-bus.scm: Turn to singleton.
+	(notify-send): Improve.
+	* src/awgetd.scm (<awgetd>): Remove `notify-bus' slot.
+	(initialize): Move creation of notify bus instance to `run-awgetd'
+	procedure.
+	(run-awgetd): Set default notify bus.
+	(aworker-main-loop): Update.
+
 	* src/wget.scm (<wget>): Add exclamation mark to setters' names.
 	All callers updated.
 	* src/awgetd.scm (initialize): Update.

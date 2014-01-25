@@ -29,7 +29,7 @@
 
 (define-module (awget util notify-bus)
   #:use-module (oop goops)
-  #:export     (<notify-bus> notify-send))
+  #:export     (<notify-bus> set-nbus! notify-send))
 
 
 ;;; Main class
@@ -47,22 +47,25 @@
    #:init-value #f
    #:init-keyword #:icon))
 
+(define nbus #f)
+
 ;; Valid urgency levels.  See 'notify-send --help'.
 (define *urgency-level-names*
   '(low normal critical))
 
+(define (set-nbus! instance)
+  "Set default notify bus instance."
+  (set! nbus instance))
+
 
 ;;; Public methods
 
-;; Send notification with urgency URGENCY-LEVEL.  Message consists of
-;; header HEADER and message MESSAGE.
-(define-method (notify-send (obj           <notify-bus>)
-                            (urgency-level <symbol>)
-                            (header        <string>)
-                            (message       <string>))
+(define (notify-send urgency-level header message)
+  "Send notification with urgency URGENCY-LEVEL.  Message consists of
+HEADER and MESSAGE."
   (let ((current-level (member urgency-level *urgency-level-names*)))
     (if (not (eqv? current-level #f))
-        (notify obj (symbol->string (car current-level)) header message)
+        (notify nbus (symbol->string (car current-level)) header message)
         (throw 'notify-bus-wrong-level urgency-level))))
 
 

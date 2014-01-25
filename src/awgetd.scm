@@ -96,10 +96,6 @@
    #:setter set-logger!
    #:getter get-logger)
 
-  (notify-bus
-   #:setter set-notify-bus!
-   #:getter get-notify-bus)
-
   (wget
    #:setter set-wget!
    #:getter get-wget)
@@ -114,9 +110,6 @@
   (set-logger! obj (make <logger>
                      #:ident    *program-name*
                      #:facility 'daemon))
-
-  (set-notify-bus! obj (make <notify-bus>
-                         #:app-name *program-name*))
 
   (if (not (eq? (get-downloads-dir obj) #f))
       (set-dir-prefix! (get-wget obj) (get-downloads-dir obj)))
@@ -176,6 +169,7 @@
     (set-wget! awgetd (make <wget>
                         #:config  conf
                         #:logfile logfile)))
+  (set-nbus! (make <notify-bus> #:app-name *program-name*))
   (daemonize))
 
 (define (set-awgetd! instance)
@@ -270,15 +264,14 @@
 
 (define (aworker-main-loop awgetd)
   "Constantly look through the queue and download uncompleted links."
-  (let ((wget       (get-wget awgetd))
-        (notify-bus (get-notify-bus awgetd)))
+  (let ((wget (get-wget awgetd)))
 
     (define (download record)
       (let ((id   (string->number (list-ref record 0)))
             (link (list-ref record 3)))
         (get-url  wget      link)
         (awlist-set-done! id)
-        (notify-send notify-bus 'low "Download finished:" link)))
+        (notify-send 'low "Download finished:" link)))
 
     (while #t
       (let ((uncompleted (awlist-get-uncompleted)))
