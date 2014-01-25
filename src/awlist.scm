@@ -59,6 +59,8 @@
 ;; Index of the timestamp
 (define *link-ts-idx* 2)
 
+(define *uncompleted-marker* "x")
+
 ;; Create the list.
 (define awlist (make <awlist>))
 
@@ -73,7 +75,7 @@
          (record        (list
                          (number->string record-number)
                          (number->string tstamp)
-                         "x" link)))
+                         *uncompleted-marker* link)))
 
     (set-last-record-number awlist record-number)
 
@@ -105,6 +107,11 @@
     (unlock-mutex (get-mutex awlist))
     link-list))
 
+(define (completed? record)
+  "Check if RECORD contains completed download job."
+  (not (string=? (list-ref record *link-ts-idx*)
+                 *uncompleted-marker*)))
+
 (define (awlist-get-uncompleted)
   "Get list of uncompleted downloads."
   (lock-mutex (get-mutex awlist))
@@ -114,7 +121,7 @@
     (unlock-mutex (get-mutex awlist))
 
     (reduce-init (lambda (prev record)
-                   (if (string=? (list-ref record *link-ts-idx*) "x")
+                   (if (not (completed? record))
                        (cons record prev)
                        prev))
                  '()

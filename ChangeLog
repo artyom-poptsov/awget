@@ -1,6 +1,11 @@
 2014-01-25  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
 	* src/awlist.scm (awlist-get-uncompleted): Use `reduce-init'.
+	(*uncompleted-marker*): New global symbol.
+	(awlist-add!): Use `*uncompleted-marker*'.
+	(completed?): New procedure.
+	(awlist-get-uncompleted): Use `completed?' to check whether the
+	job is completed or not.
 
 	* src/notify-bus.scm: Turn to singleton.
 	(notify-send): Improve.
