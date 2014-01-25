@@ -46,6 +46,11 @@
    #:init-value #f
    #:init-keyword #:dir-prefix)
 
+  (logfile
+   ;; Log file for wget
+   #:getter get-logfile
+   #:init-keyword #:logfile)
+
   (config
    #:setter set-config
    #:getter get-config
@@ -53,25 +58,29 @@
    #:init-keyword #:config))
 
 (define-method (initialize (obj <wget>) args)
-  (next-method))
+  (next-method)
+
+  (if (not (file-exists? (get-config obj)))
+      (make-default-config obj)))
+
+(define-method (make-default-config (obj <wget>))
+  (let ((f (open-output-file (get-config obj))))
+    (display (string-append  "\
+logfile = " (get-logfile obj) "
+") f)
+    (close f)))
 
 
 ;;; Public methods
 
 (define-method (get-url (obj <wget>) (url <string>))
-  (system (string-append
-           "wget"
-
-           (if (not (eq? (get-config obj) #f))
-               (string-append
-                " --config=" (get-config obj))
-               "")
-
-           (if (not (eq? (get-dir-prefix obj) #f))
-               (string-append
-                " --directory-prefix=" (get-dir-prefix obj))
-               "")
-
-           " '" url "'")))
+  (system
+   (string-append
+    "wget "
+    "--config=" (get-config obj) " "
+    (if (get-dir-prefix obj)
+        (string-append "--directory-prefix=" (get-dir-prefix obj) " ")
+        " ")
+    "'" url "'")))
 
 ;;; wget.scm ends here

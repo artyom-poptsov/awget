@@ -118,7 +118,6 @@
   (set-notify-bus! obj (make <notify-bus>
                          #:app-name *program-name*))
 
-  (set-wget! obj (make <wget>))
   (if (not (eq? (get-downloads-dir obj) #f))
       (set-dir-prefix (get-wget obj) (get-downloads-dir obj)))
 
@@ -172,6 +171,11 @@
 (define (run-awgetd)
   "Run the awget daemon."
   (setup-logging)
+  (let ((conf    (string-append (get-config-home awgetd)  "/wgetrc"))
+        (logfile (string-append (get-runtime-home awgetd) "/wget.log")))
+    (set-wget! awgetd (make <wget>
+                        #:config  conf
+                        #:logfile logfile)))
   (daemonize))
 
 (define (set-awgetd! instance)
