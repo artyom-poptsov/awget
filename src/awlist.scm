@@ -39,16 +39,19 @@
 
 (define-class <awlist> ()
   (link-list
+   ;; List of downloads.
    #:setter set-link-list!
    #:getter get-link-list
    #:init-value '())
-
   (last-record-number
+   ;; Number of the last added download.
    #:setter set-last-record-number!
    #:getter get-last-record-number
    #:init-value 0)
-
   (mutex
+   ;; Global mutex for critical sections of awlist.  Must be locked
+   ;; before doing any potentially concurrent operations on
+   ;; `link-list' in public procedures.
    #:getter get-mutex
    #:init-value (make-mutex)))
 
