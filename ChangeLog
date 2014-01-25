@@ -1,5 +1,7 @@
 2014-01-25  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
+	* src/awget.scm (main): Fix wrong call to `daemonize'.
+
 	* src/awlist.scm (<awlist>): Initialize `mutex' slot.  Remove
 	setter of the mutex.
 	(initialize): Remove mutex initialization.

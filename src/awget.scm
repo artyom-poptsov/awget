@@ -293,7 +293,7 @@ Download management:
 
      (list-wanted
       (if (not (daemon-started?))
-          (daemonize awget))
+          (daemonize))
       (print-list (get-list))
       (newline))
 
