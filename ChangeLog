@@ -1,5 +1,7 @@
 2014-01-25  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
+	* src/awlist.scm (awlist-get-uncompleted): Use `reduce-init'.
+
 	* src/notify-bus.scm: Turn to singleton.
 	(notify-send): Improve.
 	* src/awgetd.scm (<awgetd>): Remove `notify-bus' slot.

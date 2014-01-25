@@ -109,17 +109,16 @@
   "Get list of uncompleted downloads."
   (lock-mutex (get-mutex awlist))
 
-  (let ((link-list   (get-link-list awlist))
-        (uncompleted '()))
+  (let ((link-list (get-link-list awlist)))
 
     (unlock-mutex (get-mutex awlist))
 
-    (for-each
-     (lambda (record)
-       (if (string=? (list-ref record 2) "x")
-           (set! uncompleted (cons record uncompleted))))
-     link-list)
-    uncompleted))
+    (reduce-init (lambda (prev record)
+                   (if (string=? (list-ref record *link-ts-idx*) "x")
+                       (cons record prev)
+                       prev))
+                 '()
+                 link-list)))
 
 (define (awlist-clear!)
   "Clear the link list."
