@@ -1,3 +1,12 @@
+2014-02-06  Artyom Poptsov  <poptsov.artyom@gmail.com>
+
+	* Makefile.am: Move all AM code related to sources to
+	`src/Makefile.am'.
+	(SUBDIRS): Add `src' directory.
+	* configure.ac (AC_CONFIG_FILES): Add `src/Makefile'.
+	* src/Makefile.am: New file.
+	* src/.gitignore: New file.
+
 2014-01-25  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
 	* src/awget.scm (main): Fix wrong call to `daemonize'.

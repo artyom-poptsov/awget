@@ -26,9 +26,7 @@ GUILE_PROGS
 
 AM_INIT_AUTOMAKE
 
-AC_CONFIG_FILES([
-	Makefile
-])
+AC_CONFIG_FILES([Makefile src/Makefile])
 
 # Generate a Makefile, based on the results.
 AC_OUTPUT()
