@@ -1,5 +1,7 @@
 2014-02-07  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
+	* awget/.gitignore: Add missed file.
+
 	* README: Update.
 	* README.org: Add symlink to `README'.
 
