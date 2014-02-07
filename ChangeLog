@@ -1,5 +1,8 @@
 2014-02-07  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
+	* README: Update.
+	* README.org: Add symlink to `README'.
+
 	* src/: Rename to `awget/'.
 	* configure.ac, Makefile.am: Update.
 
