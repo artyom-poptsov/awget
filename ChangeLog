@@ -1,3 +1,8 @@
+2014-02-07  Artyom Poptsov  <poptsov.artyom@gmail.com>
+
+	* src/: Rename to `awget/'.
+	* configure.ac, Makefile.am: Update.
+
 2014-02-06  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
 	* Makefile.am: Move all AM code related to sources to
