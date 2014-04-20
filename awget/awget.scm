@@ -193,6 +193,9 @@ Download management:
   (set! server-socket (socket PF_UNIX SOCK_STREAM 0))
   (connect server-socket AF_UNIX socket-file))
 
+(define (disconnect-from-awgetd)
+  (close server-socket))
+
 
 (define (daemonize)
   "Run the awgetd"
@@ -309,25 +312,32 @@ Download management:
       (or (daemon-started?)
           (daemonize))
       (connect-to-awgetd)
-      (get-list))
+      (get-list)
+      (disconnect-from-awgetd))
 
      (exit-wanted
       (and (daemon-started?)
            (begin
              (connect-to-awgetd)
-             (AWGET-PROGRAM-quit xdr-void 123 server-socket))))
+             (AWGET-PROGRAM-quit xdr-void 123 server-socket)
+             (disconnect-from-awgetd))))
 
      (add-link-wanted
       (or (daemon-started?)
           (daemonize))
       (connect-to-awgetd)
-      (add-link arguments))
+      (add-link arguments)
+      (disconnect-from-awgetd))
 
      (remove-link-wanted
       (connect-to-awgetd)
       (if current-link
-          (rem-link (string->number current-link))
-          (error "No link is selected."))))
+          (begin
+            (rem-link (string->number current-link))
+            (disconnect-from-awgetd))
+          (begin
+            (disconnect-from-awgetd)
+            (error "No link is selected.")))))
 
     (quit)))
 

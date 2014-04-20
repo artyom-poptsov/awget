@@ -1,5 +1,8 @@
 2014-04-20  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
+	* awget/awget.scm (disconnect-from-awgetd): New procedure.
+	(main): Use it.
+
 	Use ONC RPC (RFC 1831) by means of GNU Guile-RPC instead of the
 	custom homebrew protocol.
 	* awget/rpc.x: New file.
@@ -17,6 +20,7 @@
 	(add-link-handler, rem-link-handler, get-list-handler)
 	(quit-handler, run-rpc-server): New procedures.
 	(add-link, rem-link, send-message, main-loop): Remove.
+
 	* awget/Makefile.am: Use grpc to produce Scheme modules from the
 	RPC definition file.
 	(rpc-types+constants.scm, rpc-client.scm, rpc-server.scm)
