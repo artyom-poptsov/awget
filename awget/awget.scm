@@ -62,7 +62,17 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
   #:use-module (oop goops)
   #:use-module (ice-9 getopt-long)
   #:use-module (ice-9 format)
-  #:use-module (awget protocol)
+  #:use-module (srfi srfi-1)
+  #:use-module (rnrs bytevectors)
+  #:use-module (ice-9 iconv)
+
+  ;; RPC
+  #:use-module (rpc rpc)
+  #:use-module (rpc xdr)
+  #:use-module (rpc xdr types)
+  #:use-module (awget rpc-client)
+  #:use-module (awget rpc-types+constants)
+
   #:use-module (awget awgetd)
   #:export     (main))
 
@@ -95,6 +105,8 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
    "/" (getenv "USER")
    "/" *program-name* ".pid"))
 
+(define server-socket #f)
+
 (define debug-mode?     #f)
 (define no-detach-mode? #f)
 
@@ -111,6 +123,9 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
   (format #t "awlist-file:  ~a~%" awlist-file)
   (display   "------------------\n"))
 
+(define (vector->utf8 v)
+  (bytevector->string (u8-list->bytevector (array->list v)) "UTF-8"))
+
 (define (print-list list)
   "List all links in the human-friendly manner."
   (let ((fmt "~5a ~15a ~a\n"))
@@ -121,10 +136,10 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
         #t
         fmt
         (list-ref line 0)
-        (if (string=? (list-ref line 2) "x")
+        (if (= (list-ref line 2) -1)
             "Downloading"
             "Done")
-        (list-ref line 3)))
+        (vector->utf8 (list-ref line 3))))
      list)))
 
 (define (debug-message message)
@@ -174,6 +189,10 @@ Download management:
   "Check if awgetd is started."
   (file-exists? pid-file))
 
+(define (connect-to-awgetd)
+  (set! server-socket (socket PF_UNIX SOCK_STREAM 0))
+  (connect server-socket AF_UNIX socket-file))
+
 
 (define (daemonize)
   "Run the awgetd"
@@ -192,39 +211,34 @@ Download management:
 
 ;;; Protocol implementation
 
-(define (send-message type message)
-  (let ((message (list type message))
-        (server-port (socket PF_UNIX SOCK_STREAM 0)))
-
-    (connect server-port AF_UNIX socket-file)
-
-    ;; Send the message
-    (display message server-port)
-    (newline server-port)
-
-    ;; Receive a response
-    (let ((response (read server-port)))
-      (close server-port)
-      response)))
-
-(define (stop-daemon)
-  (send-message *cmd-quit* #f))
-
 (define (get-list)
   "Get a download queue"
-  (send-message *cmd-get-list* #f))
-
-(define (send-link-to-daemon link)
-  "Send a link LINK to the awgetd."  
-  (send-message *cmd-add-link* link))
+  (let ((->list (lambda (result)
+                  ;; Turn a decoded `pmap-list-type' representation into a
+                  ;; Schemey list.
+                  (let loop ((input result)
+                             (output '()))
+                    (if (eq? (car input) 'TRUE)
+                        (loop (caddr input)
+                              (cons (cadr input) output))
+                        (reverse output))))))
+    (let ((response (AWGET-PROGRAM-get-list xdr-void 123 server-socket)))
+      (print-list (->list (cadr response)))
+      (newline)
+      #f)))
 
 (define (add-link link-list)
   "Add list of links to download queue"
-  (for-each (lambda (link) (send-link-to-daemon link))
-            link-list))
+ (for-each
+  (lambda (link)
+    (AWGET-PROGRAM-add-link (string->bytevector link "UTF-8")
+                            123
+                            server-socket))
+  link-list)
+  #f)
 
 (define (rem-link link-id)
-  (send-message *cmd-rem-link* link-id))
+  (AWGET-PROGRAM-rem-link link-id 123 server-socket))
 
 
 ;;; Program entry point
@@ -292,21 +306,25 @@ Download management:
           (display "Daemon already started.\n")))
 
      (list-wanted
-      (if (not (daemon-started?))
+      (or (daemon-started?)
           (daemonize))
-      (print-list (get-list))
-      (newline))
+      (connect-to-awgetd)
+      (get-list))
 
      (exit-wanted
-      (if (daemon-started?)
-          (stop-daemon)))
+      (and (daemon-started?)
+           (begin
+             (connect-to-awgetd)
+             (AWGET-PROGRAM-quit xdr-void 123 server-socket))))
 
      (add-link-wanted
-      (if (not (daemon-started?))
+      (or (daemon-started?)
           (daemonize))
+      (connect-to-awgetd)
       (add-link arguments))
 
      (remove-link-wanted
+      (connect-to-awgetd)
       (if current-link
           (rem-link (string->number current-link))
           (error "No link is selected."))))

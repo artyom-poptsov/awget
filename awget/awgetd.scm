@@ -33,13 +33,24 @@
   #:use-module (oop goops)
   #:use-module (ice-9 rdelim)
   #:use-module (ice-9 threads)
+  #:use-module (srfi srfi-1)
+  #:use-module (srfi srfi-60)
+  #:use-module (ice-9 iconv)
+  #:use-module (rnrs bytevectors)
 
   ;; Logging
   #:use-module (logging logger)
   #:use-module (logging rotating-log)
   #:use-module (logging port-log)
 
-  #:use-module (awget protocol)
+  ;; RPC
+  #:use-module (rpc rpc)
+  #:use-module (rpc rpc server)
+  #:use-module (rpc xdr)
+  #:use-module (rpc xdr types)
+  #:use-module (awget rpc-server)
+  #:use-module (awget rpc-types+constants)
+
   #:use-module (awget awlist)
   #:use-module (awget util notify-bus)
   #:use-module (awget util wget)
@@ -158,6 +169,22 @@
 (define fmt-debug (make-msg-formatter 'DEBUG))
 (define fmt-error (make-msg-formatter 'ERROR))
 
+(define (vector->utf8 v)
+  "Convert vector V to UTF-8 string."
+  (bytevector->string (u8-list->bytevector (array->list v)) "UTF-8"))
+
+;; Taken from Guile-RPC's grpc-nfs-export.in
+(define (list->optional-data-list lst)
+  "Return an RPC-usable representation of LST, a list of lists (each
+item of LST thus represents an XDR structure)."
+
+  ;; XXX: inefficient
+  (fold (lambda (elt result)
+          (cons 'TRUE
+                (append (list elt) (list result))))
+        '(FALSE . #f)
+        (reverse lst)))
+
 
 ;;; Public methods
 
@@ -181,13 +208,16 @@
 
 (define (daemonize)
   "Fork the process and start the main loop."
+  (fmt-debug "daemonize: Called.")
+  (fmt-debug "awgetd: ~a~%" awgetd)
   (if (no-detach? awgetd)
 
       (begin
+        (fmt-debug "no-detach mode")
         (open-socket)
         (start-aworker)
         (create-pid-file (getpid))
-        (main-loop))
+        (run-rpc-server))
 
       (let ((pid (primitive-fork)))
         (if (zero? pid)
@@ -203,9 +233,9 @@
 
               (register-sighandlers)
 
-              (open-socket )
+              (open-socket)
               (start-aworker)
-              (main-loop))
+              (run-rpc-server))
             (begin
               (create-pid-file pid)
               (quit))))))
@@ -236,28 +266,59 @@
 
 
 (define (open-socket)
+  (fmt-debug "open-socket: Called.")
   (set-socket! awgetd (socket PF_UNIX SOCK_STREAM 0))
   (let ((path         (get-socket-path awgetd))
         (awget-socket (get-socket awgetd)))
     (bind awget-socket AF_UNIX path)
-    (listen awget-socket 1)))
+    (listen awget-socket 1024)))
 
 (define (close-socket)
   (close (get-socket awgetd))
   (delete-file (get-socket-path awgetd)))
 
 
-(define (add-link link)
+;;; Handlers
+
+(define (add-link-handler url)
   "Add new link LINK to the download queue"
-  (fmt-debug "New link: ~a" link)
-  (awlist-add! link))
+  (fmt-debug "add-link-handler: ~a" url)
+  (let ((url (vector->utf8 url)))
+    (fmt-debug "New link: ~a" url)
+    (awlist-add! url))
+  'SUCCESS)
 
-(define (rem-link link-id)
-  (awlist-rem! link-id))
+(define (rem-link-handler link-id)
+  "Remove link with LINK-ID from the list."
+  (fmt-debug "rem-link-handler: ~a~%" link-id)
+  (awlist-rem! link-id)
+  'SUCCESS)
 
-(define (send-message message port)
-  (write message port)
-  (newline port))
+(define (get-list-handler unused)
+  "Get list of links."
+
+  (define (encode lst)
+    "Encode awlist to representation that can be transferred by RPC."
+    (map (lambda (rec)
+           ;; FIXME: ID and timestamps must be stored as numbers.
+           (list (string->number     (list-ref rec 0))
+                 (string->number     (list-ref rec 1))
+                 (string->number     (list-ref rec 2))
+                 (string->bytevector (list-ref rec 3) "UTF-8")))
+         lst))
+
+  (let* ((link-list     (encode (awlist-get)))
+         (enc-link-list (list->optional-data-list link-list)))
+    (cons 'SUCCESS (list enc-link-list))))
+
+(define (quit-handler unused)
+  (fmt-debug "quit-handler: Called.")
+  (awlist-save (get-link-list-file awgetd))
+  (shutdown-logging)
+  (close-socket)
+  (remove-pid-file)
+  ;; FIXME: Probably this handler should use one-way RPC call.
+  (quit))
 
 
 ;; Asynchronous dowloader
@@ -287,54 +348,20 @@
   (make-thread (aworker-main-loop awgetd)))
 
 
-(define (main-loop)
-  "Main loop of the awgetd"
+(define awget-rpc-server
+  (make-AWGET-PROGRAM-server
+   `(("AWGET_VERSION"
+      ("add_link" . ,add-link-handler)
+      ("rem_link" . ,rem-link-handler)
+      ("get_list" . ,get-list-handler)
+      ("quit"     . ,quit-handler)))))
 
-  (define (awget-accept socket)
-    "Wrapper for accept() that catch errors."
-    (catch 'system-error
-      (lambda ()
-        (accept socket))
-      (lambda (key . args)
-        (fmt-error "accept() call was interrupted."))))
-
-  (fmt-info "Daemon started.")
-
-  (let ((awget-socket (get-socket awgetd)))
-
-    (while #t
-      (let* ((client-connection (awget-accept awget-socket))
-             (client            (car client-connection))
-             (message           (read (open-input-string (read-line client 'trim))))
-             (message-type      (car message)))
-
-        (fmt-debug "Message type: ~a" message-type)
-
-        (cond
-
-         ((eq? message-type *cmd-get-protocol-version*)
-          (send-message *cmd-get-protocol-version* client))
-
-         ((eq? message-type *cmd-add-link*)
-          (let ((message-body (cdr message)))
-            (send-message #t client)
-            (add-link (object->string (car message-body)))))
-
-         ((eq? message-type *cmd-get-list*)
-          (send-message (awlist-get) client))
-
-         ((eq? message-type *cmd-rem-link*)
-          (let ((link-id (cadr message)))
-            (rem-link link-id)))
-
-         ((eq? message-type *cmd-quit*)
-          (begin
-            (shutdown-logging)
-            (close client)
-            (break))))
-
-        (close client))))
-
-  (stop))
+(define (run-rpc-server)
+  (fmt-debug "run-rpc-server: Called.")
+  (run-stream-rpc-server (list (cons (get-socket awgetd) awget-rpc-server))
+                         1000000
+                         #f               ;Close connections handler
+                         (lambda ()
+                           #f)))             ;Idle thunk
 
 ;;; awgetd.scm ends here.

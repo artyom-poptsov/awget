@@ -1,3 +1,29 @@
+2014-04-20  Artyom Poptsov  <poptsov.artyom@gmail.com>
+
+	Use ONC RPC (RFC 1831) by means of GNU Guile-RPC instead of the
+	custom homebrew protocol.
+	* awget/rpc.x: New file.
+	* awget/awget.scm: Use GNU Guile-RPC for IPC.
+	(vector->utf8, connect-to-awgetd): New procedures.
+	(print-list): Fix parsing of server response.
+	(main): Use GNU Guile-RPC.  Use `connect-to-awgetd' to run the awget
+	daemon.
+	(get-list, add-link, rem-link): Update to use a Guile-RPC call.
+	(send-message, stop-daemon): Remove.
+	* awget/awgetd.scm: Use GNU Guile-RPC for IPC.
+	(vector->utf8, list->optional-data-list): New procedures.
+	(daemonize): Run RPC server.
+	(open-socket): Increase backlog.
+	(add-link-handler, rem-link-handler, get-list-handler)
+	(quit-handler, run-rpc-server): New procedures.
+	(add-link, rem-link, send-message, main-loop): Remove.
+	* awget/Makefile.am: Use grpc to produce Scheme modules from the
+	RPC definition file.
+	(rpc-types+constants.scm, rpc-client.scm, rpc-server.scm)
+	(clean-rpc): New targets.
+	* README: Require GNU Guile-RPC.
+	* awget/protocol.scm: Remove.
+
 2014-02-07  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
 	* awget/.gitignore: Add missed file.
