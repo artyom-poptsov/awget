@@ -138,7 +138,8 @@
         (rotating  (make <rotating-log>
                      #:num-files 1
                      #:size-limit 10000
-                     #:file-name "/tmp/awget.log")))
+                     #:file-name (format #f "~a/awget.log"
+                                         (get-runtime-home awgetd)))))
 
     (let ((err (make <port-log> #:port (current-error-port))))
       (if (not (debug? awgetd))
