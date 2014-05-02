@@ -1,7 +1,7 @@
 2014-05-02  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
 	* awget/awgetd.scm (setup-logging): Store log in the runtime
-	directory.
+	directory.  Fix the check for debugging mode.
 
 	* awget/wget.scm (make-default-config): Use `format' instead of
 	`display'.

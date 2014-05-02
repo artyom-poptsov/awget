@@ -142,13 +142,13 @@
                                          (get-runtime-home awgetd)))))
 
     (let ((err (make <port-log> #:port (current-error-port))))
-      (if (not (debug? awgetd))
+      (or (debug? awgetd)
           (begin
             ;; don't want to see warnings or info on the screen!
             (disable-log-level! err 'WARN)
             (disable-log-level! err 'INFO)
             (disable-log-level! err 'DEBUG)))
-          (add-handler! lgr err))
+      (add-handler! lgr err))
 
     ;; add the handlers to our logger
     (add-handler! lgr rotating)
