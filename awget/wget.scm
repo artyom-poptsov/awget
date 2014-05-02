@@ -65,9 +65,7 @@
 
 (define-method (make-default-config (obj <wget>))
   (let ((f (open-output-file (get-config obj))))
-    (display (string-append  "\
-logfile = " (get-logfile obj) "
-") f)
+    (format f "logfile = ~a~%" (get-logfile obj))
     (close f)))
 
 
