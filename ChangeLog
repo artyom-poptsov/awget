@@ -1,3 +1,8 @@
+2014-05-02  Artyom Poptsov  <poptsov.artyom@gmail.com>
+
+	* awget/awgetd.scm (get-list-handler): Fix a bug: use "-1" as a
+	marker for unfinished downloads.
+
 2014-04-20  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
 	* awget/awget.scm (disconnect-from-awgetd): New procedure.

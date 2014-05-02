@@ -303,7 +303,11 @@ item of LST thus represents an XDR structure)."
            ;; FIXME: ID and timestamps must be stored as numbers.
            (list (string->number     (list-ref rec 0))
                  (string->number     (list-ref rec 1))
-                 (string->number     (list-ref rec 2))
+                 ;; FIXME: Unfinished downloads should be marked with
+                 ;; "-1"
+                 (string->number     (if (string=? (list-ref rec 2) "x")
+                                         "-1"
+                                         (list-ref rec 2)))
                  (string->bytevector (list-ref rec 3) "UTF-8")))
          lst))
 
