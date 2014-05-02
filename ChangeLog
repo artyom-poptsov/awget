@@ -1,5 +1,7 @@
 2014-05-02  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
+	* README: Update requirements.
+
 	* awget/awgetd.scm (get-list-handler): Fix a bug: use "-1" as a
 	marker for unfinished downloads.
 
