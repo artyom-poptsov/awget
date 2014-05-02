@@ -2,6 +2,7 @@
 
 	* awget/wget.scm (make-default-config): Use `format' instead of
 	`display'.
+	(initialize): Improve check for the config file.
 
 	* awget/awget.scm (print-version): Rename to
 	`print-version-and-exit'.  All callers updated.

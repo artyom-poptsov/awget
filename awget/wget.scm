@@ -59,8 +59,7 @@
 
 (define-method (initialize (obj <wget>) args)
   (next-method)
-
-  (if (not (file-exists? (get-config obj)))
+  (or (file-exists? (get-config obj))
       (make-default-config obj)))
 
 (define-method (make-default-config (obj <wget>))
