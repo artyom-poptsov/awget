@@ -1,5 +1,11 @@
 2014-05-02  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
+	* awget/awget.scm (print-version): Rename to
+	`print-version-and-exit'.  All callers updated.
+	(print-help): Rename to `print-help-and-exit'.  All callers
+	updated.
+	(main): Update.
+
 	* README: Update requirements.
 
 	* awget/awgetd.scm (get-list-handler): Fix a bug: use "-1" as a

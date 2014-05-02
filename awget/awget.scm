@@ -158,12 +158,13 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
 
 ;;; Procedures
 
-(define (print-version)
+(define (print-version-and-exit)
   (display
    (string-append
-    "awget download manager (version " *program-version* ")\n")))
+    "awget download manager (version " *program-version* ")\n"))
+  (exit 0))
 
-(define (print-help)
+(define (print-help-and-exit)
   (display
    (string-append "\
 awget download manager (version " *program-version* ")
@@ -183,7 +184,8 @@ Download management:
   --link, -n             Set current link.
   --list, -l             List all links.
   --remove, -r           Remove the current link.
-")))
+"))
+  (exit 0))
 
 (define (daemon-started?)
   "Check if awgetd is started."
@@ -296,12 +298,10 @@ Download management:
     (cond
 
      (version-wanted
-      (print-version)
-      (exit))
+      (print-version-and-exit))
 
      (help-wanted
-      (print-help)
-      (exit))
+      (print-help-and-exit))
 
      (daemon-wanted
       (if (not (daemon-started?))
