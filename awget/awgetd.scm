@@ -363,10 +363,19 @@ item of LST thus represents an XDR structure)."
 
 (define (run-rpc-server)
   (fmt-debug "run-rpc-server: Called.")
-  (run-stream-rpc-server (list (cons (get-socket awgetd) awget-rpc-server))
-                         1000000
-                         #f               ;Close connections handler
-                         (lambda ()
-                           #f)))             ;Idle thunk
+  ;; FIXME: This hack is intended to handle interruptions of `select'
+  ;;        call inside of the RPC server loop.
+  (while #t
+    (catch 'system-error
+      (lambda ()
+        (run-stream-rpc-server (list (cons (get-socket awgetd)
+                                           awget-rpc-server))
+                               1000000
+                               #f               ;Close connections handler
+                               (lambda ()
+                                 #f)))          ;Idle thunk
+      (lambda (key . args)
+        ;; FIXME: Fix `fmt-debug'
+        (fmt-debug (format #f "~a: ~a" key args))))))
 
 ;;; awgetd.scm ends here.
