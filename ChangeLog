@@ -1,5 +1,7 @@
 2014-05-03  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
+	* README: Update.
+
 	* awget/awgetd.scm (run-rpc-server): Add workaround for
 	"Interrupted system call" error which occures during `select' call
 	in the RPC server loop.

@@ -4,8 +4,8 @@ Awget is yet another download manager.  It is aimed for using with
 [[http://awesome.naquadah.org/][Awesome]] window manager, but unfortunately written in Scheme instead of
 Lua.
 
-This download manager consist of awget console tool and awgetd daemon
-which actually does all work.
+Note that this project is experimental and probably lacks some _very
+important features_ you might expect and may contain annoying bugs.
 
 * Requirements
 
@@ -16,76 +16,63 @@ Awget has got the following dependences:
  - [[https://www.gnu.org/software/wget/][wget]]
  - [[https://developer.gnome.org/libnotify/][libnotify]]
 
-Note that this project is under quite active development, and probably
-it lacks some _very important features_ you might expect and/or
-contains annoying bugs.
-
 * Installation
 
 Awget can be installed in the classical manner:
 
 #+BEGIN_EXAMPLE
-  $ ./configure
-  $ sudo make install
+$ autoreconf -vif
+$ ./configure
+$ sudo make install
 #+END_EXAMPLE
 
-See INSTALL for general information about installation.
+See =INSTALL= for general information about installation.
 
-The program will be installed in =/usr/local/bin= and Scheme sources
-will be placed in =/usr/local/share/awget= directory by default.
-
-There is an script for OpenRC, so you can manage awgetd with the
+There is an script for OpenRC, so you can manage awget daemon with the
 standard tool =rc-config= in [[http://www.gentoo.org/][Gentoo GNU/Linux]] distribution.  First of
 all, copy the file to the =/etc/init.d= directory:
 
 #+BEGIN_EXAMPLE
-  $ sudo cp etc/init.gentoo /etc/init.d/awgetd
+$ sudo cp etc/init.gentoo /etc/init.d/awgetd
 #+END_EXAMPLE
 
 Then create a symlink to awgetd for the every user that should be able
 to use awgetd as a service:
 
 #+BEGIN_EXAMPLE
-  $ sudo ln -s awget /etc/init.d/awgetd.$USER
+$ sudo ln -s awget /etc/init.d/awgetd.$USER
 #+END_EXAMPLE
 
 * Usage
 
 Normally awgetd will be started as soon as you try to add the first
 link.  But you can start the daemon manually by calling awget with
-`-d' option:
+=-d= (or =--daemon=) option:
 
 #+BEGIN_EXAMPLE
-  $ awget -d
+$ awget -d
 #+END_EXAMPLE
 
 Now you can add a new link that will be put in a queue for download:
 
 #+BEGIN_EXAMPLE
-  $ awget -a ftp://ftp.gnu.org/gnu/guile/guile-2.0.0.tar.gz
+$ awget -a ftp://ftp.gnu.org/gnu/guile/guile-2.0.0.tar.gz
 #+END_EXAMPLE
 
-The `-n' (or `--link') option can be used for setting the current link
+The =-n= (or =--link=) option can be used for setting the current link
 for further operations.  The option takes a link ID as a parameter.
-Link ID can be gained from the first column of the `-l' output.  For
-example, to remove the first link from awget, you should use `-n'
-option along with `-r' (or `--remove'):
+Link ID can be gained from the first column of the =-l= (or =--list=)
+output.  For example, you can use =-n= option along with =-r= (or
+=--remove=) to remove a link:
 
 #+BEGIN_EXAMPLE
-  $ awget -n 1 -r
+$ awget -n 1 -r
 #+END_EXAMPLE
 
 To get brief information about awget usage and possible options type:
 
 #+BEGIN_EXAMPLE
-  $ awget -h
-#+END_EXAMPLE
-
-Also the standard Guile tool =display-commentary= can be used to get
-extra information about files:
-
-#+BEGIN_EXAMPLE
-  $ guile-tools display-commentary awget.scm
+$ awget -h
 #+END_EXAMPLE
 
 You can configure wget through the =~/.config/awget/wgetrc= file.  See
@@ -95,6 +82,6 @@ If awgetd stopped abnormally, do the following to get awget working
 again:
 
 #+BEGIN_EXAMPLE
-  $ rm /run/awget/awget.pid
-  $ rm ~/.cache/awget/awget
+$ rm /run/awget/awget.pid
+$ rm ~/.cache/awget/awget
 #+END_EXAMPLE
