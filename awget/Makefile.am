@@ -10,7 +10,7 @@ awget_util_DATA	= dsv-parser.scm notify-bus.scm wget.scm
 
 GRPCC = `which grpc-compile`
 
-awget: awget.scm
+awget: awget.in
 	sed -e 's|__DATA_DIR__|$(datadir)|g' $< > $@
 	chmod +x $@
 

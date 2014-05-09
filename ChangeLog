@@ -1,3 +1,8 @@
+2014-05-09  Artyom Poptsov  <poptsov.artyom@gmail.com>
+
+	* awget/awget.scm: Rename to `awget.in'.
+	* awget/Makefile.am (awget): Update.
+
 2014-05-03  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
 	* README: Update.
