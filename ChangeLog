@@ -5,6 +5,7 @@
 	(make-all-dirs): Simplify a bit.  Add docstring.
 	(%pid-file): Rename to `%default-pid-file'.  Store PID in the
 	runtime directory.
+	(%default-pid-file): Fix a bug: fix immutable variable names.
 
 	* awget/awget.scm: Rename to `awget.in'.
 	* awget/Makefile.am (awget): Update.

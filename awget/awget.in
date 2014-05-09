@@ -100,7 +100,7 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
   (string-append %awget-data-home "/awlist"))
 
 (define %default-pid-file
-  (string-append awget-runtime-home "/" *program-name* ".pid"))
+  (string-append %awget-runtime-home "/" %program-name ".pid"))
 
 (define server-socket #f)
 
