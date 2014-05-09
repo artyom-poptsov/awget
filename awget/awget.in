@@ -99,11 +99,8 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
 (define %awlist-file
   (string-append %awget-data-home "/awlist"))
 
-(define %pid-file
-  (string-append
-   "/var/run/" %program-name
-   "/" (getenv "USER")
-   "/" %program-name ".pid"))
+(define %default-pid-file
+  (string-append awget-runtime-home "/" *program-name* ".pid"))
 
 (define server-socket #f)
 
@@ -191,7 +188,7 @@ Download management:
 
 (define (daemon-started?)
   "Check if awgetd is started."
-  (file-exists? %pid-file))
+  (file-exists? %default-pid-file))
 
 (define (connect-to-awgetd)
   (set! server-socket (socket PF_UNIX SOCK_STREAM 0))
@@ -209,7 +206,7 @@ Download management:
                    #:runtime-home      %awget-runtime-home
                    #:no-detach-mode    no-detach-mode?
                    #:debug-mode        debug-mode?
-                   #:awget-pid-file    %pid-file
+                   #:awget-pid-file    %default-pid-file
                    #:awget-socket-path %socket-file
                    #:link-list-file    %awlist-file)))
     (set-awgetd! awgetd)
