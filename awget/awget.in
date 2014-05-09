@@ -7,7 +7,7 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
 
 ;;; awget -- Awget download manager
 
-;; Copyright (C) 2013 Artyom V. Poptsov <poptsov.artyom@gmail.com>
+;; Copyright (C) 2013, 2014 Artyom V. Poptsov <poptsov.artyom@gmail.com>
 ;;
 ;; This file is a part of awget.
 ;;
@@ -76,34 +76,34 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
   #:use-module (awget awgetd)
   #:export     (main))
 
-(define *program-name*    "awget")
-(define *program-version* "v0.1")
+(define %program-name    "awget")
+(define %program-version "v0.1")
 
 ;;; Honor the XDG specs
 ;; <http://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html>
 
-(define awget-data-home
-  (format #f "~a/.local/share/~a" (getenv "HOME") *program-name*))
+(define %awget-data-home
+  (format #f "~a/.local/share/~a" (getenv "HOME") %program-name))
 
-(define awget-config-home
-  (format #f "~a/.config/~a" (getenv "HOME") *program-name*))
+(define %awget-config-home
+  (format #f "~a/.config/~a" (getenv "HOME") %program-name))
 
-(define awget-runtime-home
-  (format #f "~a/.cache/~a" (getenv "HOME") *program-name*))
+(define %awget-runtime-home
+  (format #f "~a/.cache/~a" (getenv "HOME") %program-name))
 
 ;;;
 
-(define socket-file
-  (string-append awget-runtime-home "/" *program-name*))
+(define %socket-file
+  (string-append %awget-runtime-home "/" %program-name))
 
-(define awlist-file
-  (string-append awget-data-home "/awlist"))
+(define %awlist-file
+  (string-append %awget-data-home "/awlist"))
 
-(define pid-file
+(define %pid-file
   (string-append
-   "/var/run/" *program-name*
+   "/var/run/" %program-name
    "/" (getenv "USER")
-   "/" *program-name* ".pid"))
+   "/" %program-name ".pid"))
 
 (define server-socket #f)
 
@@ -116,11 +116,11 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
 (define (print-pathes)
   "Print pathes used by the program."
   (display   "----- pathes -----\n")
-  (format #t "data-home:    ~a~%" awget-data-home)
-  (format #t "config-home:  ~a~%" awget-config-home)
-  (format #t "runtime-home: ~a~%" awget-runtime-home)
-  (format #t "socket-file:  ~a~%" socket-file)
-  (format #t "awlist-file:  ~a~%" awlist-file)
+  (format #t "data-home:    ~a~%" %awget-data-home)
+  (format #t "config-home:  ~a~%" %awget-config-home)
+  (format #t "runtime-home: ~a~%" %awget-runtime-home)
+  (format #t "socket-file:  ~a~%" %socket-file)
+  (format #t "awlist-file:  ~a~%" %awlist-file)
   (display   "------------------\n"))
 
 (define (vector->utf8 v)
@@ -153,9 +153,9 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
     (or (file-exists? dir)
         (mkdir dir)))
 
-  (mkdir-if-not-exists awget-data-home)
-  (mkdir-if-not-exists awget-config-home)
-  (mkdir-if-not-exists awget-runtime-home))
+  (mkdir-if-not-exists %awget-data-home)
+  (mkdir-if-not-exists %awget-config-home)
+  (mkdir-if-not-exists %awget-runtime-home))
 
 
 ;;; Procedures
@@ -163,15 +163,15 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
 (define (print-version-and-exit)
   (display
    (string-append
-    "awget download manager (version " *program-version* ")\n"))
+    "awget download manager (version " %program-version ")\n"))
   (exit 0))
 
 (define (print-help-and-exit)
   (display
    (string-append "\
-awget download manager (version " *program-version* ")
+awget download manager (version " %program-version ")
 
-Usage: " *program-name* " [options]
+Usage: " %program-name " [options]
 
 General options:
   --help, -h             Print this message and exit.
@@ -191,11 +191,11 @@ Download management:
 
 (define (daemon-started?)
   "Check if awgetd is started."
-  (file-exists? pid-file))
+  (file-exists? %pid-file))
 
 (define (connect-to-awgetd)
   (set! server-socket (socket PF_UNIX SOCK_STREAM 0))
-  (connect server-socket AF_UNIX socket-file))
+  (connect server-socket AF_UNIX %socket-file))
 
 (define (disconnect-from-awgetd)
   (close server-socket))
@@ -204,14 +204,14 @@ Download management:
 (define (daemonize)
   "Run the awgetd"
   (let* ((awgetd (make <awgetd>
-                   #:data-home         awget-data-home
-                   #:config-home       awget-config-home
-                   #:runtime-home      awget-runtime-home
+                   #:data-home         %awget-data-home
+                   #:config-home       %awget-config-home
+                   #:runtime-home      %awget-runtime-home
                    #:no-detach-mode    no-detach-mode?
                    #:debug-mode        debug-mode?
-                   #:awget-pid-file    pid-file
-                   #:awget-socket-path socket-file
-                   #:link-list-file    awlist-file)))
+                   #:awget-pid-file    %pid-file
+                   #:awget-socket-path %socket-file
+                   #:link-list-file    %awlist-file)))
     (set-awgetd! awgetd)
     (display "Starting awgetd...\n")
     (run-awgetd)))
