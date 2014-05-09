@@ -58,10 +58,8 @@
 (define-method (initialize (obj <awlist>) args)
   (next-method))
 
-;; Index of the timestamp
-(define *link-ts-idx* 2)
-
-(define *uncompleted-marker* "x")
+(define %link-ts-idx 2)                 ;Index of the timestamp
+(define %uncompleted-marker "x")
 
 ;; Create the list.
 (define awlist (make <awlist>))
@@ -73,7 +71,7 @@
   "Create a new record for uncompleted job."
   (list (number->string number)
         (number->string timestamp)
-        *uncompleted-marker* link))
+        %uncompleted-marker link))
 
 (define (awlist-add! link)
   "Add new link LINK to the list."
@@ -94,7 +92,7 @@
 
   (let ((rec (assoc (number->string id) (get-link-list awlist))))
     (if rec
-        (list-set! rec *link-ts-idx* (number->string (current-time)))))
+        (list-set! rec %link-ts-idx (number->string (current-time)))))
 
   (unlock-mutex (get-mutex awlist)))
 
@@ -114,8 +112,8 @@
 
 (define (completed? record)
   "Check if RECORD contains completed download job."
-  (not (string=? (list-ref record *link-ts-idx*)
-                 *uncompleted-marker*)))
+  (not (string=? (list-ref record %link-ts-idx)
+                 %uncompleted-marker)))
 
 (define (awlist-get-uncompleted)
   "Get list of uncompleted downloads."

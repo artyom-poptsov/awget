@@ -1,5 +1,10 @@
 2014-05-09  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
+	* awget/awlist.scm: Rename global immutable variables: use
+	'%'-prefix to mark them.
+	(*link-ts-idx*): Rename to `%link-ts-idx'.
+	(*uncompleted-marker*): Rename to `%uncompleted-marker'.
+
 	* awget/config.scm.in: New file.
 	* awget/awget.in: Move global configuration of directories and
 	files to `config.scm.in'.
