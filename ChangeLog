@@ -1,5 +1,7 @@
 2014-05-09  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
+	* awget/awget.in (make-all-dirs): Simplify a bit.  Add docstring.
+
 	* awget/awget.scm: Rename to `awget.in'.
 	* awget/Makefile.am (awget): Update.
 

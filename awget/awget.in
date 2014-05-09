@@ -148,8 +148,10 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
       (display message)))
 
 (define (make-all-dirs)
+  "Make all needed directories."
   (define (mkdir-if-not-exists dir)
-    (if (not (file-exists? dir)) (mkdir dir)))
+    (or (file-exists? dir)
+        (mkdir dir)))
 
   (mkdir-if-not-exists awget-data-home)
   (mkdir-if-not-exists awget-config-home)
