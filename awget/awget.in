@@ -73,37 +73,11 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
   #:use-module (awget rpc-client)
   #:use-module (awget rpc-types+constants)
 
+  #:use-module (awget config)
   #:use-module (awget awgetd)
   #:export     (main))
 
-(define %program-name    "awget")
-(define %program-version "v0.1")
-
-;;; Honor the XDG specs
-;; <http://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html>
-
-(define %awget-data-home
-  (format #f "~a/.local/share/~a" (getenv "HOME") %program-name))
-
-(define %awget-config-home
-  (format #f "~a/.config/~a" (getenv "HOME") %program-name))
-
-(define %awget-runtime-home
-  (format #f "~a/.cache/~a" (getenv "HOME") %program-name))
-
-;;;
-
-(define %socket-file
-  (string-append %awget-runtime-home "/" %program-name))
-
-(define %awlist-file
-  (string-append %awget-data-home "/awlist"))
-
-(define %default-pid-file
-  (string-append %awget-runtime-home "/" %program-name ".pid"))
-
 (define server-socket #f)
-
 (define debug-mode?     #f)
 (define no-detach-mode? #f)
 

@@ -1,0 +1,58 @@
+;;; config.scm.in -- Awget configuration.              -*- scheme -*-
+
+;; Copyright (C) 2014 Artyom V. Poptsov <poptsov.artyom@gmail.com>
+;;
+;; This file is a part of awget.
+;;
+;; awget is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+;;
+;; awget is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;;
+;; You should have received a copy of the GNU General Public License
+;; along with awget.  If not, see <http://www.gnu.org/licenses/>.
+
+
+;;; Commentary:
+
+;; Compile-time configuration for Awget.
+
+
+;;; Code:
+
+(define-module (awget config))
+
+(define-public %program-name    "awget")
+(define-public %program-version "@PACKAGE_VERSION@")
+
+
+;;; Honor the XDG specs
+;; <http://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html>
+
+(define-public %awget-data-home
+  (format #f "~a/.local/share/~a" (getenv "HOME") %program-name))
+
+(define-public %awget-config-home
+  (format #f "~a/.config/~a" (getenv "HOME") %program-name))
+
+(define-public %awget-runtime-home
+  (format #f "~a/.cache/~a" (getenv "HOME") %program-name))
+
+
+;;; Files
+
+(define-public %awlist-file
+  (string-append %awget-data-home "/awlist"))
+
+(define-public %socket-file
+  (string-append %awget-runtime-home "/" %program-name))
+
+(define-public %default-pid-file
+  (string-append %awget-runtime-home "/" %program-name ".pid"))
+
+;;; config.scm.in ends here

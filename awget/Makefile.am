@@ -3,12 +3,22 @@ bin_SCRIPTS	= awget
 awgetdir   = $(datadir)/awget
 awget_DATA = \
 	awgetd.scm awlist.scm \
-	rpc-types+constants.scm rpc-client.scm rpc-server.scm
+	rpc-types+constants.scm rpc-client.scm rpc-server.scm \
+	config.scm
 
 awget_utildir	= $(pkgdatadir)/util
 awget_util_DATA	= dsv-parser.scm notify-bus.scm wget.scm
 
 GRPCC = `which grpc-compile`
+
+substitute = sed -e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g'
+
+SUFFIXES = .in
+
+.in:
+	$(substitute) "$^" > "$@.tmp" && 	\
+	chmod +x "$@.tmp" &&			\
+	mv "$@.tmp" "$@"
 
 awget: awget.in
 	sed -e 's|__DATA_DIR__|$(datadir)|g' $< > $@
@@ -56,5 +66,5 @@ clean-rpc:
 .PHONY: clean-rpc
 
 CLEANFILES = \
-	awget $(RPC)
+	awget $(RPC) config.scm
 
