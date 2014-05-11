@@ -1,6 +1,13 @@
+#!/bin/sh
+# aside from this initial boilerplate, this is actually -*- scheme -*- code
+export GUILE_LOAD_PATH=__DATA_DIR__
+main='(module-ref (resolve-module '\''(awget awgetd)) '\'main')'
+exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
+!#
+
 ;;; awgetd.scm -- Daemon that retrieves URLs.
 
-;; Copyright (C) 2013 Artyom V. Poptsov <poptsov.artyom@gmail.com>
+;; Copyright (C) 2013, 2014 Artyom V. Poptsov <poptsov.artyom@gmail.com>
 ;;
 ;; This file is a part of awget.
 ;;
@@ -37,6 +44,7 @@
   #:use-module (srfi srfi-60)
   #:use-module (ice-9 iconv)
   #:use-module (rnrs bytevectors)
+  #:use-module (ice-9 getopt-long)
 
   ;; Logging
   #:use-module (logging logger)
@@ -51,6 +59,7 @@
   #:use-module (awget rpc-server)
   #:use-module (awget rpc-types+constants)
 
+  #:use-module (awget config)
   #:use-module (awget awlist)
   #:use-module (awget util notify-bus)
   #:use-module (awget util wget)
@@ -377,5 +386,85 @@ item of LST thus represents an XDR structure)."
       (lambda (key . args)
         ;; FIXME: Fix `fmt-debug'
         (fmt-debug (format #f "~a: ~a" key args))))))
+
+(define (daemon-started?)
+  "Check if awgetd is started."
+  (file-exists? %default-pid-file))
+
+(define (make-all-dirs)
+  "Make all needed directories."
+  (define (mkdir-if-not-exists dir)
+    (or (file-exists? dir)
+        (mkdir dir)))
+
+  (mkdir-if-not-exists %awget-data-home)
+  (mkdir-if-not-exists %awget-config-home)
+  (mkdir-if-not-exists %awget-runtime-home))
+
+(define (print-info)
+  (let ((f format))
+    (f #t "----- pathes -----~%")
+    (f #t "data-home:    ~a~%" %awget-data-home)
+    (f #t "config-home:  ~a~%" %awget-config-home)
+    (f #t "runtime-home: ~a~%" %awget-runtime-home)
+    (f #t "socket-file:  ~a~%" %socket-file)
+    (f #t "awlist-file:  ~a~%" %awlist-file)
+    (f #t "pid-file:     ~a~%" (get-pid-file awgetd))
+    (f #t "------------------~%")))
+
+(define (print-help-and-exit)
+  (display
+   (string-append "\
+Usage: awgetd [options]
+
+General options:
+  --help, -h             Print this message and exit.
+  --pid-file             File to store the process ID (PID)
+  --debug                Debug mode.  Normally you should not use this.
+  --no-detach            No-Detach mode.  Normally you should not use this.
+"))
+  (exit 0))
+
+(define %option-spec
+  '((no-detach                   (value #f))
+    (debug                       (value #f))
+    (pid-file                    (value #t))
+    (help      (single-char #\h) (value #f))))
+
+(define (main . args)
+  "Entry point of the program."
+  (let* ((options           (getopt-long args %option-spec))
+         (help-wanted?      (option-ref options 'help      #f))
+         (debug-wanted?     (option-ref options 'debug     #f))
+         (no-detach-wanted? (option-ref options 'no-detach #f))
+         (pid-file          (option-ref options 'pid-file  #f)))
+
+    (and help-wanted?
+         (print-help-and-exit))
+
+    (make-all-dirs)
+
+    (and debug-wanted?
+         (fmt-debug "Debug mode enabled."))
+
+    (and no-detach-wanted?
+         (fmt-debug "No-Detach mode enabled."))
+
+    (set-awgetd! (make <awgetd>
+                   #:data-home         %awget-data-home
+                   #:config-home       %awget-config-home
+                   #:runtime-home      %awget-runtime-home
+                   #:no-detach-mode    no-detach-wanted?
+                   #:debug-mode        debug-wanted?
+                   #:awget-pid-file    (or pid-file %default-pid-file)
+                   #:awget-socket-path %socket-file
+                   #:link-list-file    %awlist-file))
+
+    (and debug-wanted?
+         (print-info))
+
+    (if (not (daemon-started?))
+        (run-awgetd)
+        (display "Daemon already started.\n"))))
 
 ;;; awgetd.scm ends here.

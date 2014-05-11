@@ -79,7 +79,6 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
 
 (define server-socket #f)
 (define debug-mode?     #f)
-(define no-detach-mode? #f)
 
 
 ;;; Helper procedures
@@ -147,10 +146,11 @@ Usage: " %program-name " [options]
 General options:
   --help, -h             Print this message and exit.
   --version, -v          Print program version and exit.
-  --daemon, -d           Start the awget daemon (awgetd).
+  --daemon, -d           Start the awget daemon (awgetd).  You can pass
+                         arguments to the daemon as well.
+                         Example: " %program-name " -d -- --no-detach
   --exit, -x             Stop daemon.
   --debug                Debug mode.  Normally you should not use this.
-  --no-detach            No-Detach mode.  Normally you should not use this.
 
 Download management:
   --add, -a              Add a new link.
@@ -170,22 +170,6 @@ Download management:
 
 (define (disconnect-from-awgetd)
   (close server-socket))
-
-
-(define (daemonize)
-  "Run the awgetd"
-  (let* ((awgetd (make <awgetd>
-                   #:data-home         %awget-data-home
-                   #:config-home       %awget-config-home
-                   #:runtime-home      %awget-runtime-home
-                   #:no-detach-mode    no-detach-mode?
-                   #:debug-mode        debug-mode?
-                   #:awget-pid-file    %default-pid-file
-                   #:awget-socket-path %socket-file
-                   #:link-list-file    %awlist-file)))
-    (set-awgetd! awgetd)
-    (display "Starting awgetd...\n")
-    (run-awgetd)))
 
 ;;; Protocol implementation
 
@@ -231,7 +215,6 @@ Download management:
       (version (single-char #\v) (value #f))
       (help    (single-char #\h) (value #f))
       (debug                     (value #f))
-      (no-detach                 (value #f))
       ;; Link management
       (add     (single-char #\a) (value #f))
       (link    (single-char #\n) (value #t))
@@ -246,7 +229,6 @@ Download management:
          (daemon-wanted  (option-ref options 'daemon  #f))
          (exit-wanted    (option-ref options 'exit    #f))
          (debug-wanted   (option-ref options 'debug   #f))
-         (no-detach-wanted (option-ref options 'no-detach #f))
 
          (add-link-wanted    (option-ref options 'add    #f))
          (list-wanted        (option-ref options 'list   #f))
@@ -255,17 +237,7 @@ Download management:
 
          (arguments      (option-ref options '()      #f)))
 
-    (if (eq? debug-wanted #t)
-        (begin
-          (set! debug-mode? #t)
-          (debug-message "Debug mode enabled.\n")))
-
-    (if no-detach-wanted
-        (begin
-          (set! no-detach-mode? #t)
-          (debug-message "No-Detach mode enabled.\n")))
-
-    (if debug-mode?
+    (if debug-wanted
         (print-pathes))
 
     (cond
@@ -277,27 +249,19 @@ Download management:
       (print-help-and-exit))
 
      (daemon-wanted
-      (if (not (daemon-started?))
-          (daemonize)
-          (display "Daemon already started.\n")))
+      (system (string-append "awgetd " (string-join arguments))))
 
      (list-wanted
-      (or (daemon-started?)
-          (daemonize))
       (connect-to-awgetd)
       (get-list)
       (disconnect-from-awgetd))
 
      (exit-wanted
-      (and (daemon-started?)
-           (begin
-             (connect-to-awgetd)
-             (AWGET-PROGRAM-quit xdr-void 123 server-socket)
-             (disconnect-from-awgetd))))
+      (connect-to-awgetd)
+      (AWGET-PROGRAM-quit xdr-void 123 server-socket)
+      (disconnect-from-awgetd))
 
      (add-link-wanted
-      (or (daemon-started?)
-          (daemonize))
       (connect-to-awgetd)
       (add-link arguments)
       (disconnect-from-awgetd))

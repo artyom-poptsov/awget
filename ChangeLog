@@ -1,3 +1,17 @@
+2014-05-11  Artyom Poptsov  <poptsov.artyom@gmail.com>
+
+	Turn the awgetd to a standalone program.  This is the first step
+	to make awget work over a network.
+
+	* awget/awgetd.scm: Rename to `awget/awgetd.in'.  Turn to a
+	standalone program.
+	* awget/awget.in (print-help-and-exit): Update.
+	(daemonize): Remove.
+	(main): Remove most of the stuff related to awgetd.
+	* awget/Makefile.am (bin_SCRIPTS): Add `awgetd'.
+	(awget_DATA): Remove `awgetd.scm'.
+	(awgetd): New target.
+
 2014-05-09  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
 	* awget/awlist.scm: Rename global immutable variables: use

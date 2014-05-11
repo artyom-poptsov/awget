@@ -1,8 +1,10 @@
-bin_SCRIPTS	= awget
+bin_SCRIPTS = 		\
+	awget		\
+	awgetd
 
 awgetdir   = $(datadir)/awget
 awget_DATA = \
-	awgetd.scm awlist.scm \
+	awlist.scm \
 	rpc-types+constants.scm rpc-client.scm rpc-server.scm \
 	config.scm
 
@@ -21,6 +23,10 @@ SUFFIXES = .in
 	mv "$@.tmp" "$@"
 
 awget: awget.in
+	sed -e 's|__DATA_DIR__|$(datadir)|g' $< > $@
+	chmod +x $@
+
+awgetd: awgetd.in
 	sed -e 's|__DATA_DIR__|$(datadir)|g' $< > $@
 	chmod +x $@
 
