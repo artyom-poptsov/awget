@@ -67,7 +67,7 @@
             dsv-string-split))
 
 ;; Default delimiter for DSV
-(define *default-delimiter* #\:)
+(define %default-delimiter #\:)
 
 
 ;; Convert DSV from a string STRING to a list.  If delimiter DELIM is
@@ -89,7 +89,7 @@
 (define (dsv-string->list string . delim)
   (let ((delimiter (if (not (null? delim))
                        (car delim)
-                       *default-delimiter*)))
+                       %default-delimiter)))
     (dsv-string-split string delimiter)))
 
 
@@ -108,7 +108,7 @@
 (define (list->dsv-string list . delim)
   (let ((delimiter (if (not (null? delim))
                      (car delim)
-                       *default-delimiter*)))
+                       %default-delimiter)))
     (let append-field ((rec list))
       (string-append
        (escape-special-chars (car rec) delimiter #\\)
@@ -134,7 +134,7 @@
         (delimiter (if (and (not (null? args))
                             (not (null? (cdr args))))
                        (cadr args)
-                       *default-delimiter*)))
+                       %default-delimiter)))
     (let parse ((dsv-list '()))
       (let ((line (read-line port)))
         (if (not (eof-object? line))
@@ -166,7 +166,7 @@
         (delimiter (if (and (not (null? args))
                             (not (null? (cdr args))))
                        (cadr args)
-                       *default-delimiter*)))
+                       %default-delimiter)))
 
     (let ((dsv (map (lambda (data)
                       (if (not (null? data))
@@ -200,7 +200,7 @@
 (define (dsv-string-split string . delim)
   (let ((delimiter (if (not (null? delim))
                        (car delim)
-                       *default-delimiter*))
+                       %default-delimiter))
         (dsv-list  '()))
 
     (let parse ((start 0)

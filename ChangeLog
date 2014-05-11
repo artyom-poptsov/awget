@@ -1,3 +1,8 @@
+2014-05-12  Artyom Poptsov  <poptsov.artyom@gmail.com>
+
+	* awget/dsv-parser.scm (*default-delimiter*): Rename to
+	`%default-delimiter'.
+
 2014-05-11  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
 	Turn the awgetd to a standalone program.  This is the first step
