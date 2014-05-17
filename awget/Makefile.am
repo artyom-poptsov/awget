@@ -67,7 +67,7 @@ rpc-server.scm: rpc.x
 	$(GRPCC) --server < $< |\
 		sed 's|^(define |(define-public |g' >> $@
 
-clean-rpc:
+clean-rpc: $(RPC)
 	-$(RM) -f $(RPC)
 .PHONY: clean-rpc
 
