@@ -68,7 +68,7 @@ rpc-server.scm: rpc.x
 		sed 's|^(define |(define-public |g' >> $@
 
 clean-rpc: $(RPC)
-	-$(RM) -f $(RPC)
+	-$(RM) $(RPC)
 .PHONY: clean-rpc
 
 CLEANFILES = \

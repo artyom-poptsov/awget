@@ -1,6 +1,7 @@
 2014-05-17  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
-	* awget/Makefile.am (clean-rpc): Require RPC files.
+	* awget/Makefile.am (clean-rpc): Require RPC files.  Remove extra
+	`-f' switch.
 
 	* awget/Makefile.am: Don't use `util' directory.
 	(awget_util_DATA): Remove.
