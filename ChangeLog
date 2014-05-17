@@ -1,5 +1,7 @@
 2014-05-17  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
+	* awget/awget.in: Don't use absent awgetd module.
+
 	It turned out that I misunderstood Ludovic -- the workaround for
 	EINTR is already in Guile-RPC.  No need for another workaround in
 	Awget.

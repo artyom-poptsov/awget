@@ -74,7 +74,6 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
   #:use-module (awget rpc-types+constants)
 
   #:use-module (awget config)
-  #:use-module (awget awgetd)
   #:export     (main))
 
 (define server-socket #f)
