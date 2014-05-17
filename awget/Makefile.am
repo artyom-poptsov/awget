@@ -2,14 +2,19 @@ bin_SCRIPTS = 		\
 	awget		\
 	awgetd
 
+RPC = \
+	rpc-types+constants.scm		\
+	rpc-client.scm			\
+	rpc-server.scm
+
 awgetdir   = $(datadir)/awget
 awget_DATA = \
-	awlist.scm \
-	rpc-types+constants.scm rpc-client.scm rpc-server.scm \
-	config.scm
-
-awget_utildir	= $(pkgdatadir)/util
-awget_util_DATA	= dsv-parser.scm notify-bus.scm wget.scm
+	awlist.scm			\
+	config.scm			\
+	dsv-parser.scm 			\
+	notify-bus.scm 			\
+	wget.scm 			\
+	$(RPC)
 
 GRPCC = `which grpc-compile`
 
@@ -61,11 +66,6 @@ rpc-server.scm: rpc.x
 	echo '  #:use-module (rpc xdr types))' >> $@
 	$(GRPCC) --server < $< |\
 		sed 's|^(define |(define-public |g' >> $@
-
-RPC = \
-	rpc-types+constants.scm		\
-	rpc-client.scm			\
-	rpc-server.scm
 
 clean-rpc:
 	-$(RM) -f $(RPC)

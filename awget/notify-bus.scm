@@ -27,7 +27,7 @@
 
 ;;; Code:
 
-(define-module (awget util notify-bus)
+(define-module (awget notify-bus)
   #:use-module (oop goops)
   #:export     (<notify-bus> set-nbus! notify-send))
 

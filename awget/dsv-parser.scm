@@ -53,7 +53,7 @@
 
 ;;; Code:
 
-(define-module (awget util dsv-parser)
+(define-module (awget dsv-parser)
   #:use-module (ice-9 rdelim)
   #:use-module (ice-9 regex)
 

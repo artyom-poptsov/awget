@@ -26,7 +26,7 @@
 
 (define-module (awget awlist)
   #:use-module (oop goops)
-  #:use-module (awget util dsv-parser)
+  #:use-module (awget dsv-parser)
   #:use-module (ice-9 common-list)
   #:export (awlist-add!
             awlist-rem!

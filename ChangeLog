@@ -1,5 +1,11 @@
 2014-05-17  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
+	* awget/Makefile.am: Don't use `util' directory.
+	(awget_util_DATA): Remove.
+	(awget_DATA): Add `dsv-parser.scm', `notify-bus.scm', `wget.scm'.
+	* awget/awgetd.in, awget/awgetd.in, awget/awlist.scm,
+	awget/dsv-parser.scm, awget/notify-bus.scm, awget/wget.scm: Update.
+
 	* awget/awget.in: Don't use absent awgetd module.
 
 	It turned out that I misunderstood Ludovic -- the workaround for

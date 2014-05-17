@@ -61,8 +61,8 @@ exec ${GUILE-guile} -l $0 -c "(apply $main (command-line))" "$@"
 
   #:use-module (awget config)
   #:use-module (awget awlist)
-  #:use-module (awget util notify-bus)
-  #:use-module (awget util wget)
+  #:use-module (awget notify-bus)
+  #:use-module (awget wget)
   #:export (<awgetd> set-awgetd! run-awgetd))
 
 (define *program-name* "awgetd")
