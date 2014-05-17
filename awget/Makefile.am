@@ -16,6 +16,8 @@ awget_DATA = \
 	wget.scm 			\
 	$(RPC)
 
+EXTRA_DIST = awget.in awgetd.in config.scm.in
+
 GRPCC = `which grpc-compile`
 
 substitute = sed -e 's,[@]PACKAGE_VERSION[@],$(PACKAGE_VERSION),g'

@@ -2,6 +2,7 @@
 
 	* awget/Makefile.am (clean-rpc): Require RPC files.  Remove extra
 	`-f' switch.
+	(EXTRA_DIST): Add .in-files.
 
 	* awget/Makefile.am: Don't use `util' directory.
 	(awget_util_DATA): Remove.
