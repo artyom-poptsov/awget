@@ -1,3 +1,7 @@
+2014-05-17  Artyom Poptsov  <poptsov.artyom@gmail.com>
+
+	* awget/.gitignore: Ignore generated files.
+
 2014-05-12  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
 	* awget/dsv-parser.scm (*default-delimiter*): Rename to

@@ -1,5 +1,10 @@
 # -*- shell-script -*-
 
 awget
+awgetd
+config.scm
+rpc-client.scm
+rpc-server.scm
+rpc-types+constants.scm
 Makefile.in
 Makefile
