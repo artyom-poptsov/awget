@@ -1,5 +1,11 @@
 2014-05-17  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
+	It turned out that I misunderstood Ludovic -- the workaround for
+	EINTR is already in Guile-RPC.  No need for another workaround in
+	Awget.
+	* awget/awgetd.in (EINTR-safe): Remove.
+	(run-rpc-server): Remove the workaround.
+
 	* awget/awgetd.in (EINTR-safe): New procedure.
 	(run-rpc-server): Use `EINTR-safe' as a workaround for EINTR
 	issue.

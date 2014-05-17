@@ -361,21 +361,6 @@ item of LST thus represents an XDR structure)."
 (define (start-aworker)
   (make-thread (aworker-main-loop awgetd)))
 
-;; Thanks to Ludovic Courtès for this workaround:
-;;   <https://lists.gnu.org/archive/html/guile-rpc-bugs/2014-05/msg00001.html>
-(define (EINTR-safe proc)
-  "Wrap PROC so that if a 'system-error' exception with EINTR is raised (that
-was possible up to Guile 2.0.9 included) the call to PROC is restarted."
-  (lambda args
-    (let loop ()
-      (catch 'system-error
-        (lambda ()
-          (apply proc args))
-        (lambda args
-          (if (= EINTR (system-error-errno args))
-              (loop)
-              (apply throw args)))))))
-
 
 (define awget-rpc-server
   (make-AWGET-PROGRAM-server
@@ -387,13 +372,12 @@ was possible up to Guile 2.0.9 included) the call to PROC is restarted."
 
 (define (run-rpc-server)
   (fmt-debug "run-rpc-server: Called.")
-  (let ((safe-run-stream-rpc-server (EINTR-safe run-stream-rpc-server)))
-    (safe-run-stream-rpc-server (list (cons (get-socket awgetd)
-                                            awget-rpc-server))
-                                1000000
-                                #f               ;Close connections handler
-                                (lambda ()
-                                  #f))))         ;Idle thunk
+  (run-stream-rpc-server (list (cons (get-socket awgetd)
+                                     awget-rpc-server))
+                         1000000
+                         #f               ;Close connections handler
+                         (lambda ()
+                           #f)))          ;Idle thunk
 
 (define (daemon-started?)
   "Check if awgetd is started."
