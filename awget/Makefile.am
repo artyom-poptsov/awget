@@ -11,7 +11,6 @@ awgetdir   = $(datadir)/awget
 awget_DATA = \
 	awlist.scm			\
 	config.scm			\
-	dsv-parser.scm 			\
 	notify-bus.scm 			\
 	wget.scm 			\
 	$(RPC)

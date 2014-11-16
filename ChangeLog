@@ -1,3 +1,10 @@
+2014-11-16  Artyom Poptsov  <poptsov.artyom@gmail.com>
+
+	* README: Add Guile-DSV to the requirements.
+	* awget/dsv-parser.scm: Remove.
+	* awget/awlist.scm: Use (dsv).
+	* awget/Makefile.am (awget_DATA): Remove `dsv-parser.scm'.
+
 2014-05-17  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
 	* awget/Makefile.am (clean-rpc): Require RPC files.  Remove extra

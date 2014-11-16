@@ -13,6 +13,7 @@ Awget has got the following dependences:
 
  - [[https://www.gnu.org/software/guile/][GNU Guile]] 2.0+
  - [[https://www.gnu.org/software/guile-rpc/][GNU Guile-RPC]]
+ - [[https://github.com/artyom-poptsov/guile-dsv][Guile-DSV]]
  - [[https://www.gnu.org/software/wget/][wget]]
  - [[https://developer.gnome.org/libnotify/][libnotify]]
 
