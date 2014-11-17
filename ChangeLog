@@ -1,3 +1,8 @@
+2014-11-17  Artyom Poptsov  <poptsov.artyom@gmail.com>
+
+	* awget/awgetd.in (run-rpc-server): Use `const' for the idle
+	thunk.
+
 2014-11-16  Artyom Poptsov  <poptsov.artyom@gmail.com>
 
 	* README: Add Guile-DSV to the requirements.

@@ -376,8 +376,7 @@ item of LST thus represents an XDR structure)."
                                      awget-rpc-server))
                          1000000
                          #f               ;Close connections handler
-                         (lambda ()
-                           #f)))          ;Idle thunk
+                         (const #f)))     ;Idle thunk
 
 (define (daemon-started?)
   "Check if awgetd is started."
